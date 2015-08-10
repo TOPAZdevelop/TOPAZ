@@ -938,7 +938,7 @@ ELSEIF( CORRECTION.EQ.1 ) THEN
 
 
 ! ------------ fermionic loops --------------
-      do iPrimAmp=15,18
+      do iPrimAmp=11,14
           call SetKirill(PrimAmps(iPrimAmp))
           call PentCut(PrimAmps(iPrimAmp))
           call QuadCut(PrimAmps(iPrimAmp))
