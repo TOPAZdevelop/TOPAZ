@@ -1008,14 +1008,12 @@ ELSEIF( CORRECTION.EQ.1 ) THEN
       FermionPartAmp(up,-2:1) = Nf_light*PrimAmps(PrimAmp2_15234)%Result(-2:1) &
           + Nf_light*Q_up*PrimAmps(PrimAmp2_12354)%Result(-2:1) & 
            + PrimAmps(PrimAmp2m_15234)%Result(-2:1)  &
-           + Q_up*PrimAmps(PrimAmp2m_12354)%Result(-2:1) &
-           + PrimAmps(PrimAmp2m_12534)%Result(-2:1) 
+           + Q_up*PrimAmps(PrimAmp2m_12354)%Result(-2:1) 
 
       FermionPartAmp(dn,-2:1) = Nf_light*PrimAmps(PrimAmp2_15234)%Result(-2:1) &
            + Nf_light*Q_dn*PrimAmps(PrimAmp2_12354)%Result(-2:1) &
            + PrimAmps(PrimAmp2m_15234)%Result(-2:1) &
-           + Q_dn*PrimAmps(PrimAmp2m_12354)%Result(-2:1) &
-           + PrimAmps(PrimAmp2m_12534)%Result(-2:1) 
+           + Q_dn*PrimAmps(PrimAmp2m_12354)%Result(-2:1) 
 
      NLO_Res_Pol(-2:1) = Col1L_ttbqqb(1,1) *( dreal(LOPartAmp(up)*dconjg(FermionPartAmp(up,-2:1)))*PDFFac(up) &
                                             + dreal(LOPartAmp(dn)*dconjg(FermionPartAmp(dn,-2:1)))*PDFFac(dn) )
