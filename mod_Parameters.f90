@@ -14,7 +14,7 @@ logical, public :: unweighted
 logical, public :: HelSampling
 logical, public :: FirstLOThenVI
 integer, public :: DKRE_switch
-integer, public, save :: ColorlessTag=3   !  1=SM Z, 2=SM+BSM Z, 3=SM+BSM Higgs
+integer, public, save :: ColorlessTag=1   !  1=SM Z, 2=SM+BSM Z, 3=SM+BSM Higgs
 integer(8), public, save :: EvalCounter=0
 integer(8), public, save :: PSCutCounter=0
 integer(8), public, save :: SkipCounter=0
@@ -99,6 +99,7 @@ real(8), public :: RelDelF1A, RelDelF1V, RelDelF2A, RelDelF2V   !, DeltaF2A, Del
 real(8), public :: DelGam2V,DelGam2A       ! q-dependent coupling for the photon
 
 logical, parameter :: TTBPhoton_SMonly = .true.
+logical, parameter :: TTBPhoton = .true.
 
 ! top-H couplings
 real(8), public :: kappaTTBH      
@@ -536,6 +537,11 @@ ENDIF
    if( Process.ge.71 .and. Process.le.76 ) then
       couplZTT_left_dyn  = couplZTT_left
       couplZTT_right_dyn = couplZTT_right
+   elseif (Process.ge.81 .and. Process.le.89 ) then
+! this is because these are the variables used in the currents, 
+! so we set them to the top-gamma vector coupling = Q_top=2/3
+      couplZTT_left_dyn  = 2d0/3d0
+      couplZTT_right_dyn = 2d0/3d0
    elseif( Process.ge.101 .and. Process.le.106 ) then
       couplZTT_left_dyn  = -m_top/vev * ( kappaTTBH - (0d0,1d0)*kappaTTBH_tilde )   ! it would be good to rename this 
       couplZTT_right_dyn = -m_top/vev * ( kappaTTBH + (0d0,1d0)*kappaTTBH_tilde )   ! couplHTT in the future (or maybe couplXTT ? )
