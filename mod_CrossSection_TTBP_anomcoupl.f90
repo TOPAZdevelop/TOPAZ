@@ -192,7 +192,6 @@ ELSEIF( Correction.EQ.1 ) THEN
       ListPrimAmps=(/1,2,3,5,7,10,13,16,19,20,21,24,27,28,29,31,33,35/)
 
 !------------ bosonic loops --------------
-      print  *, "doing bosonic loops"
       do iPrimAmp=1,12
           call SetKirill(PrimAmps(iPrimAmp))
           call PentCut_new(PrimAmps(:),iPrimAmp)
@@ -349,19 +348,7 @@ ELSEIF( Correction.EQ.1 ) THEN
       enddo
       NLO_Res_UnPol(-2:1) = NLO_Res_UnPol(-2:1) + NLO_Res_Pol(-2:1)
 
-  
-
- print *, "LO", LO_Res_Pol
- print *, ""
- print *, "1-loop amplitudes:"
- print *, "bosonic loops"
- print *, NLO_Res_UnPol
-! stop
-! print *, "|Ta*Tb|^2*Re[M0*cong(M1)]:", PhotonCouplCorr*ColLO_ttbgg(1,1)*dreal( BornAmps(1)%Result * dconjg( BosonicPartAmp(1,-2:1) ))
-! print *, "|Tb*Ta|^2*Re[M0*cong(M1)]:", PhotonCouplCorr*ColLO_ttbgg(2,2)*dreal( BornAmps(2)%Result * dconjg( BosonicPartAmp(2,-2:1) ))
-! print *, "check",cdabs( BosonicPartAmp(3,-2:1) )
-! stop
-
+ 
 ! ------------ fermionic loops --------------
 ! for the ttb+photon, we can just use vector couplings to the light quarks in th e loop
 
@@ -398,14 +385,15 @@ ELSEIF( Correction.EQ.1 ) THEN
 
 
 ! the fermion loops are combined into gauge invariant prims first
-       PrimAmps(PrimAmp2_12534)%Result = PrimAmps(PrimAmp2_12534)%Result +PrimAmps(PrimAmp2_12354)%Result +PrimAmps(PrimAmp2_12345)%Result 
-       PrimAmps(PrimAmp2_12543)%Result = PrimAmps(PrimAmp2_12543)%Result +PrimAmps(PrimAmp2_12453)%Result +PrimAmps(PrimAmp2_12435)%Result 
+       PrimAmps(PrimAmp2_12534)%Result  = PrimAmps(PrimAmp2_12534)%Result +PrimAmps(PrimAmp2_12354)%Result +PrimAmps(PrimAmp2_12345)%Result 
+       PrimAmps(PrimAmp2_12543)%Result  = PrimAmps(PrimAmp2_12543)%Result +PrimAmps(PrimAmp2_12453)%Result +PrimAmps(PrimAmp2_12435)%Result 
        PrimAmps(PrimAmp2m_12534)%Result = PrimAmps(PrimAmp2m_12534)%Result +PrimAmps(PrimAmp2m_12354)%Result +PrimAmps(PrimAmp2m_12345)%Result 
        PrimAmps(PrimAmp2m_12543)%Result = PrimAmps(PrimAmp2m_12543)%Result +PrimAmps(PrimAmp2m_12453)%Result +PrimAmps(PrimAmp2m_12435)%Result 
-       PrimAmps(PrimAmp2_13254)%Result = PrimAmps(PrimAmp2_13254)%Result +PrimAmps(PrimAmp2_13245)%Result 
-       PrimAmps(PrimAmp2_14253)%Result = PrimAmps(PrimAmp2_14253)%Result +PrimAmps(PrimAmp2_14235)%Result           
+       PrimAmps(PrimAmp2_13254)%Result  = PrimAmps(PrimAmp2_13254)%Result +PrimAmps(PrimAmp2_13245)%Result 
+       PrimAmps(PrimAmp2_14253)%Result  = PrimAmps(PrimAmp2_14253)%Result +PrimAmps(PrimAmp2_14235)%Result           
        PrimAmps(PrimAmp2m_13254)%Result = PrimAmps(PrimAmp2m_13254)%Result +PrimAmps(PrimAmp2m_13245)%Result           
        PrimAmps(PrimAmp2m_14253)%Result = PrimAmps(PrimAmp2m_14253)%Result +PrimAmps(PrimAmp2m_14235)%Result   
+    
 
 ! check on poles
        do iPrimAmp=7,18
@@ -420,7 +408,6 @@ ELSEIF( Correction.EQ.1 ) THEN
 
 ! QP 
           if ( AccPoles .gt. DPtol ) then
-!          if (.false.) then
              useQP=useQP+1
              if (PrimAmps(APrimAmp)%NumSisters .gt. 0) then
                 lastSister=PrimAmps(APrimAmp)%Sisters(PrimAmps(APrimAmp)%NumSisters)
@@ -484,10 +471,10 @@ ELSEIF( Correction.EQ.1 ) THEN
                & + nf_light*PrimAmps(PrimAmp2_15243)%Result &
                & + PrimAmps(PrimAmp2m_15243)%Result &
                & + PrimAmps(PrimAmp2m_12543)%Result
-!!!         FermionLoopPartAmp(3,-2:1)=&               
-!!!              &  +PrimAmps(PrimAmp2m_13254)%Result(-2:1)
-!!!         FermionLoopPartAmp(4,-2:1)=&
-!!!              & +PrimAmps(PrimAmp2m_14253)%Result(-2:1)
+         FermionLoopPartAmp(3,-2:1)=&               
+              &  +PrimAmps(PrimAmp2m_13254)%Result(-2:1)
+         FermionLoopPartAmp(4,-2:1)=&
+              & +PrimAmps(PrimAmp2m_14253)%Result(-2:1)
 
          Col1Lf_ttbggZ = 0d0
          Col1Lf_ttbggZ(1,1) = 4d0 * Cf**2 * Nc - 2d0*Cf  !  56/3 = 64/3 -8/3
@@ -508,9 +495,6 @@ ELSEIF( Correction.EQ.1 ) THEN
          enddo
          NLO_Res_UnPol_Ferm(-2:1) = NLO_Res_UnPol_Ferm(-2:1) + NLO_Res_Pol(-2:1)
 
-         print *, "ferm loops", NLO_Res_UnPol_Ferm
-         stop
-
 ! RR DEBUG: still need to implement this
 !   call Gamma5Renorm_gg(MomExt(1:4,12:13),BornAmps,RenormAmps,Ren_Res_Pol)
 !   Ren_Res_UnPol=Ren_Res_UnPol + Ren_Res_Pol
@@ -519,6 +503,20 @@ ELSEIF( Correction.EQ.1 ) THEN
 
       enddo! helicity loop
    ENDIF
+
+
+print *, "LO Res UnPol",LO_Res_UnPol
+print *, "(Bosonic loops)/LO, DP",NLO_Res_UnPol(-2)/LO_Res_UnPol
+print *, "(Bosonic loops)/LO, SP",NLO_Res_UnPol(-1)/LO_Res_UnPol
+print *, "(Bosonic loops)/LO, fin",(NLO_Res_UnPol(0)+NLO_Res_UnPol(1))/LO_Res_UnPol
+print *, "(fermionic loops)/LO, DP",NLO_Res_UnPol_Ferm(-2)/LO_Res_UnPol
+print *, "(fermionic loops)/LO, SP",NLO_Res_UnPol_Ferm(-1)/LO_Res_UnPol
+print *, "(fermionic loops)/LO, fin",(NLO_Res_UnPol_Ferm(0)+NLO_Res_UnPol_Ferm(1))/LO_Res_UnPol
+print *, "(Bosonic+fermionic loops)/LO, DP", (NLO_Res_UnPol(-2)+NLO_Res_UnPol_Ferm(-2))/LO_Res_UnPol
+print *, "(Bosonic+fermionic loops)/LO, SP", (NLO_Res_UnPol(-1)+NLO_Res_UnPol_Ferm(-1))/LO_Res_UnPol
+print *, "(Bosonic+fermionic loops)/LO, fin",(NLO_Res_UnPol(0)+NLO_Res_UnPol(1)+NLO_Res_UnPol_Ferm(0)+NLO_Res_UnPol_Ferm(1))/LO_Res_UnPol
+stop
+
 
 
 IF( Correction.EQ.0 ) THEN
@@ -637,8 +635,9 @@ real(8) ::  EvalCS_anomcoupl_1L_ttbqqbp,yRnd(1:VegasMxDim),VgsWgt,xE
 complex(8) :: rdiv(1:2),LO_Res_Pol,LO_Res_Unpol,NLO_Res_Pol(-2:1),NLO_Res_UnPol(-2:1),NLO_Res_Unpol_Ferm(-2:1)
 complex(8) :: BosonicPartAmp(1:2,-2:1),FermionPartAmp(1:2,-2:1),mydummy(1:2),LOPartAmp(1:2)
 integer :: iHel,iPrimAmp,jPrimAmp,APrimAmp,ListPrimAmps(1:12),LocalSisters(1:12)
-real(8) :: EHat,RunFactor,PSWgt,PSWgt2,PSWgt3,ISFac,AccPoles,HOp(1:2,1:3),pdf_z(-6:6,1:2)
-real(8) :: MomExt(1:4,1:12)
+real(8) :: EHat,RunFactor,PSWgt,PSWgt2,PSWgt3,ISFac,AccPoles,HOp(1:2,1:3),pdf_z(-6:6,1:2),AccPoles16,AccPoles18
+real(8) :: MomExt(1:4,1:12),p12gam(1:4),p34gam(1:4)
+complex(8) :: s12gam,s34gam,fermloop_fin(1:2)
 logical :: applyPSCut,nonrenormcoupl
 real(8) :: MG_MOM(0:3,1:NumExtParticles)
 real(8) :: MadGraph_tree
@@ -766,7 +765,7 @@ IF( CORRECTION.EQ.0 ) THEN
 
         LO_Res_UnPol = LO_Res_UnPol + LO_Res_Pol
     enddo!helicity loop
-  enddo! npdf loop
+ enddo! npdf loop
   print *, "LO_Res_UnPol", LO_Res_UnPol
   stop
   call swapMom(MomExt(1:4,1),MomExt(1:4,2))   ! swap back to original order, for ID below
@@ -930,15 +929,27 @@ ELSEIF( CORRECTION.EQ.1 ) THEN
       NLO_Res_UnPol(-2:1) = NLO_Res_UnPol(-2:1) + NLO_Res_Pol(-2:1)
 
 
- print *, "LO", LO_Res_Pol
- print *, ""
- print *, "1-loop amplitudes:"
- print *, "bosonic loops"
- print *, NLO_Res_Pol
-
-
 ! ------------ fermionic loops --------------
-      do iPrimAmp=11,14
+
+! loops with photon on EXTERNAL quark lines
+! this provides an analytic form for Prims 15,17
+! note: this will make c.c. and rat piece disagree with "old" ttb+photon calc,
+! but fin = (c.c. + rat.) should be the same
+      p12gam(1:4)=ExtParticle(1)%Mom(1:4)+ExtParticle(2)%Mom(1:4)+ExtParticle(5)%Mom(1:4)
+      p34gam(1:4)=ExtParticle(3)%Mom(1:4)+ExtParticle(4)%Mom(1:4)+ExtParticle(5)%Mom(1:4)
+      s12gam=p12gam(1)**2-p12gam(2)**2-p12gam(3)**2-p12gam(4)**2
+      s34gam=p34gam(1)**2-p34gam(2)**2-p34gam(3)**2-p34gam(4)**2
+      fermloop_fin(1) = -2d0/3d0*log(-MuRen**2/s12gam)-10d0/9d0
+      fermloop_fin(2) = -2d0/3d0*log(-MuRen**2/s34gam)-10d0/9d0
+      PrimAmps(PrimAmp2_15234)%Result(-1)=-2d0/3d0 * BornAmps(1)%Result
+      PrimAmps(PrimAmp2_15234)%Result(0)=fermloop_fin(1) * BornAmps(1)%Result
+      PrimAmps(PrimAmp2_15234)%Result(1)= (0d0,0d0)      
+      PrimAmps(PrimAmp2_12354)%Result(-1)=-2d0/3d0 * BornAmps(2)%Result
+      PrimAmps(PrimAmp2_12354)%Result(0)=fermloop_fin(2) * BornAmps(2)%Result
+      PrimAmps(PrimAmp2_12354)%Result(1)= (0d0,0d0)
+
+       do iPrimAmp=11,18
+          if ( (iPrimAmp .eq. PrimAmp2_12354 .or. iPrimAmp .eq. PrimAmp2_15234) ) cycle
           call SetKirill(PrimAmps(iPrimAmp))
           call PentCut(PrimAmps(iPrimAmp))
           call QuadCut(PrimAmps(iPrimAmp))
@@ -947,26 +958,26 @@ ELSEIF( CORRECTION.EQ.1 ) THEN
           call SingCut(PrimAmps(iPrimAmp))
           call EvalMasterIntegrals(PrimAmps(iPrimAmp),MuRen**2)
           PrimAmps(iPrimAmp)%Result(-2:1) = -(0d0,1d0)*PrimAmps(iPrimAmp)%Result(-2:1) !minus if from closed fermion loop
-          print *, iPrimAmp,PrimAmps(iPrimAmp)%Result
       enddo
 
+! recombine amplitudes with photon on light/heavy loop
       PrimAmps(PrimAmp2m_12534)%Result = PrimAmps(PrimAmp2m_12534)%Result + PrimAmps(PrimAmp2m_12345)%Result
-      ! hack to get correct Born Amp to compare with heavy loop with Z on loop
+      PrimAmps(PrimAmp2_12534)%Result =PrimAmps(PrimAmp2_12534)%Result + PrimAmps(PrimAmp2_12345)%Result
+! hack to get correct Born Amp to compare with with Z on light/heavy loop
+      BornAmps(PrimAmp2_12534)%Result  = BornAmps(2)%Result
       BornAmps(PrimAmp2m_12534)%Result = BornAmps(1)%Result
 
-      do iPrimAmp=10,12
+
+      do iPrimAmp=9,12
          APrimAmp=ListPrimAmps(iPrimAmp)
          call OneLoopDiv(PrimAmps(APrimAmp),MuRen**2,3,rdiv(2),rdiv(1))
          rdiv(1)=rdiv(1)+1.0d0/3.0d0         
          ! this is a hack to give me the "correct pole for the Z on the top loop
          ! ideally, of course, this will be correctly calculated by oneloopdiv, and we can remove these lines...
-         if (iPrimAmp .eq. 10) then
+         if ((iPrimAmp .eq. 9) .or. (iPrimAmp .eq. 10)) then
             rdiv=0d0
          endif
 
-! RR REMOVE -- overwrite poles with analytic value to check SP
-!         print *, 'overwriting single poles with analytic result'
-!         PrimAmps(APrimAmp)%Result(-1)=rdiv(1)*BornAmps(APrimAmp)%Result
          AccPoles = CheckPoles(PrimAmps(APrimAmp),BornAmps(APrimAmp),rdiv(1:2))
 
          if (AccPoles .gt. DPtol) then
@@ -1008,177 +1019,37 @@ ELSEIF( CORRECTION.EQ.1 ) THEN
       FermionPartAmp(up,-2:1) = Nf_light*PrimAmps(PrimAmp2_15234)%Result(-2:1) &
           + Nf_light*Q_up*PrimAmps(PrimAmp2_12354)%Result(-2:1) & 
            + PrimAmps(PrimAmp2m_15234)%Result(-2:1)  &
-           + Q_up*PrimAmps(PrimAmp2m_12354)%Result(-2:1) 
+           + Q_up*PrimAmps(PrimAmp2m_12354)%Result(-2:1) &
+           + (2d0*Q_up+3d0*Q_dn)*PrimAmps(PrimAmp2_12534)%Result(-2:1)
 
       FermionPartAmp(dn,-2:1) = Nf_light*PrimAmps(PrimAmp2_15234)%Result(-2:1) &
            + Nf_light*Q_dn*PrimAmps(PrimAmp2_12354)%Result(-2:1) &
            + PrimAmps(PrimAmp2m_15234)%Result(-2:1) &
-           + Q_dn*PrimAmps(PrimAmp2m_12354)%Result(-2:1) 
+           + Q_dn*PrimAmps(PrimAmp2m_12354)%Result(-2:1) &
+           + (2d0*Q_up+3d0*Q_dn)*PrimAmps(PrimAmp2_12534)%Result(-2:1)
+
 
      NLO_Res_Pol(-2:1) = Col1L_ttbqqb(1,1) *( dreal(LOPartAmp(up)*dconjg(FermionPartAmp(up,-2:1)))*PDFFac(up) &
                                             + dreal(LOPartAmp(dn)*dconjg(FermionPartAmp(dn,-2:1)))*PDFFac(dn) )
      NLO_Res_UnPol_Ferm(-2:1) = NLO_Res_UnPol_Ferm(-2:1) + NLO_Res_Pol(-2:1)
 
-     print *, "fermionic loops"
-     print *, "NLO_Res_Pol_Ferm",NLO_Res_Pol(-2:1)
-     pause
-
-
-! print *, LOPartAmp(dn)*dsqrt(2d0)*Q_top
-! print *, "",NLO_Res_UnPol(-2)*2d0*Q_top**2/PDFFac(dn)  *2d0
-! print *, "",NLO_Res_UnPol(-1)*2d0*Q_top**2/PDFFac(dn)  *2d0
-! print *, "",(NLO_Res_UnPol(0)+NLO_Res_UnPol(1))*2d0*Q_top**2/PDFFac(dn)  *2d0
-
-! print *, "check",(BosonicPartAmp(dn,-2)+FermionPartAmp(dn,-2))/LOPartAmp(dn)! = -2*C_F
-! pause
-
-! !     check with Andreas
-!       Q_in=Q_up
-!       mydummy(1) = LOPartAmp(1)
-!       print *, "1.) tree level:",dcmplx(mydummy(1)*dsqrt(2d0))
-!
-!       mydummy(1) =BosonicPartAmp(dn,-2)+FermionPartAmp(dn,-2)
-!       print *, "2.) Summe aller 1-loop Beiträge:",dcmplx(mydummy(1)*dsqrt(2d0))*Q_top
-!       mydummy(1) =BosonicPartAmp(dn,-1)+FermionPartAmp(dn,-1)
-!       print *, "2.) Summe aller 1-loop Beiträge:",dcmplx(mydummy(1)*dsqrt(2d0))*Q_top
-!       mydummy(1) =BosonicPartAmp(dn,0)+FermionPartAmp(dn,0)+BosonicPartAmp(dn,1)+FermionPartAmp(dn,1)
-!       print *, "2.) Summe aller 1-loop Beiträge:",dcmplx(mydummy(1)*dsqrt(2d0))*Q_top
-!
-!       mydummy(1) =BosonicPartAmp(1,-2)
-!       print *, "3.) 2.) ohne geschlossene fermion loops:",dcmplx(mydummy(1)*dsqrt(2d0))
-!       mydummy(1) =BosonicPartAmp(1,-1)
-!       print *, "3.) 2.) ohne geschlossene fermion loops:",dcmplx(mydummy(1)*dsqrt(2d0))
-!       mydummy(1) =BosonicPartAmp(1,0)+BosonicPartAmp(1,1)
-!       print *, "3.) 2.) ohne geschlossene fermion loops:",dcmplx(mydummy(1)*dsqrt(2d0))
-!
-!
-!       mydummy(1) = FermionPartAmp(1,-2)
-!       print *, "4.) alle fermion loops:",dcmplx(mydummy(1)*dsqrt(2d0))
-!       mydummy(1) = FermionPartAmp(1,-1)
-!       print *, "4.) alle fermion loops:",dcmplx(mydummy(1)*dsqrt(2d0))
-!       mydummy(1) = FermionPartAmp(1,0)+FermionPartAmp(1,1)
-!       print *, "4.) alle fermion loops:",dcmplx(mydummy(1)*dsqrt(2d0))
-!
-!
-!       mydummy(1) = Nc * PrimAmps(PrimAmp1_15234)%Result(-2)
-!       print *, "5.) leading color (LC), Q_top term:",dcmplx(mydummy(1)*dsqrt(2d0))
-!       mydummy(1) = Nc * PrimAmps(PrimAmp1_15234)%Result(-1)
-!       print *, "5.) leading color (LC), Q_top term:",dcmplx(mydummy(1)*dsqrt(2d0))
-!       mydummy(1) = Nc * (PrimAmps(PrimAmp1_15234)%Result(0)+PrimAmps(PrimAmp1_15234)%Result(1))
-!       print *, "5.) leading color (LC), Q_top term:",dcmplx(mydummy(1)*dsqrt(2d0))
-!
-!
-!       mydummy(1) =Nc * ( Q_in/Q_top*PrimAmps(PrimAmp1_12354)%Result(-2) )
-!       print *, "6.) LC, Q_q term:",dcmplx(mydummy(1)*dsqrt(2d0))
-!       mydummy(1) =Nc * ( Q_in/Q_top*PrimAmps(PrimAmp1_12354)%Result(-1) )
-!       print *, "6.) LC, Q_q term:",dcmplx(mydummy(1)*dsqrt(2d0))
-!       mydummy(1) =Nc * Q_in/Q_top*(PrimAmps(PrimAmp1_12354)%Result(0)+PrimAmps(PrimAmp1_12354)%Result(1) )
-!       print *, "6.) LC, Q_q term:",dcmplx(mydummy(1)*dsqrt(2d0))
-!
-!
-!       mydummy(1) =  - 2d0/Nc*( PrimAmps(PrimAmp1_15234)%Result(-2)  &
-!                    + PrimAmps(PrimAmp1_15243)%Result(-2)  )  &
-!                    - 1d0/Nc * ( PrimAmps(PrimAmp3_15432)%Result(-2) + PrimAmps(PrimAmp3_14532)%Result(-2) + PrimAmps(PrimAmp3_14352)%Result(-2)   &
-!                     + PrimAmps(PrimAmp4_15234)%Result(-2) )
-!       print *, "7.) subLC, Q_top term:",dcmplx(mydummy(1)*dsqrt(2d0))! 2.111381630660386E-002
-!
-!       mydummy(1) =  - 2d0/Nc*( PrimAmps(PrimAmp1_15234)%Result(-1)  &
-!                    + PrimAmps(PrimAmp1_15243)%Result(-1)  )  &
-!                    - 1d0/Nc * ( PrimAmps(PrimAmp3_15432)%Result(-1) + PrimAmps(PrimAmp3_14532)%Result(-1) + PrimAmps(PrimAmp3_14352)%Result(-1)   &
-!                     + PrimAmps(PrimAmp4_15234)%Result(-1) )
-!       print *, "7.) subLC, Q_top term:",dcmplx(mydummy(1)*dsqrt(2d0)) ! 0.140413498945346
-!
-!       mydummy(1) =  - 2d0/Nc*( PrimAmps(PrimAmp1_15234)%Result(0)  &
-!                    + PrimAmps(PrimAmp1_15243)%Result(0)  )  &
-!                    - 1d0/Nc * ( PrimAmps(PrimAmp3_15432)%Result(0) + PrimAmps(PrimAmp3_14532)%Result(0) + PrimAmps(PrimAmp3_14352)%Result(0)   &
-!                     + PrimAmps(PrimAmp4_15234)%Result(0) ) &
-!                   - 2d0/Nc*( PrimAmps(PrimAmp1_15234)%Result(1)  &
-!                    + PrimAmps(PrimAmp1_15243)%Result(1)  )  &
-!                    - 1d0/Nc * ( PrimAmps(PrimAmp3_15432)%Result(1) + PrimAmps(PrimAmp3_14532)%Result(1) + PrimAmps(PrimAmp3_14352)%Result(1)   &
-!                     + PrimAmps(PrimAmp4_15234)%Result(1) )
-!       print *, "7.) subLC, Q_top term:",dcmplx(mydummy(1)*dsqrt(2d0))! 0.656123011732464
-!
-!
-!       mydummy(1) =  - 2d0/Nc*(  + Q_in/Q_top*PrimAmps(PrimAmp1_12354)%Result(-2) &
-!                     + (-1D0)*Q_in/Q_top*PrimAmps(PrimAmp1_12453)%Result(-2) )  &
-!                    - 1d0/Nc * ( - Q_in/Q_top*PrimAmps(PrimAmp3_14532)%Result(-2)  &
-!                   +(-1D0)* Q_in/Q_top*(PrimAmps(PrimAmp4_12534)%Result(-2)+PrimAmps(PrimAmp4_12345)%Result(-2)+PrimAmps(PrimAmp4_15234)%Result(-2)) )
-!       print *, "8.) subLC, Q_q term:",dcmplx(mydummy(1)*dsqrt(2d0))! 9.419615601729865E-003! 8.335952209979481E-003 +I*( -4.386463135293729E-003 )
-!
-!       mydummy(1) =  - 2d0/Nc*(  + Q_in/Q_top*PrimAmps(PrimAmp1_12354)%Result(-1) &
-!                     + (-1D0)*Q_in/Q_top*PrimAmps(PrimAmp1_12453)%Result(-1) )  &
-!                    - 1d0/Nc * ( - Q_in/Q_top*PrimAmps(PrimAmp3_14532)%Result(-1)  &
-!                   + (-1D0)*Q_in/Q_top*(PrimAmps(PrimAmp4_12534)%Result(-1)+PrimAmps(PrimAmp4_12345)%Result(-1)+PrimAmps(PrimAmp4_15234)%Result(-1)) )
-!       print *, "8.) subLC, Q_q term:",dcmplx(mydummy(1)*dsqrt(2d0))!,mydummy(1)*dsqrt(2d0)! 6.264345095599894E-002! 4.397233889470472E-002 +I*(  4.461653684236241E-002 )
-!
-!
-!       mydummy(1) =  - 2d0/Nc*(  + Q_in/Q_top*PrimAmps(PrimAmp1_12354)%Result(0) &
-!                     + (-1D0)*Q_in/Q_top*PrimAmps(PrimAmp1_12453)%Result(0) )  &
-!                    - 1d0/Nc * ( - Q_in/Q_top*PrimAmps(PrimAmp3_14532)%Result(0)  &
-!                   + (-1D0)*Q_in/Q_top*(PrimAmps(PrimAmp4_12534)%Result(0)+PrimAmps(PrimAmp4_12345)%Result(0)+PrimAmps(PrimAmp4_15234)%Result(0)) ) &
-!                 - 2d0/Nc*(  + Q_in/Q_top*PrimAmps(PrimAmp1_12354)%Result(1) &
-!                     + (-1D0)*Q_in/Q_top*PrimAmps(PrimAmp1_12453)%Result(1) )  &
-!                    - 1d0/Nc * ( - Q_in/Q_top*PrimAmps(PrimAmp3_14532)%Result(1)  &
-!                   + (-1D0)*Q_in/Q_top*(PrimAmps(PrimAmp4_12534)%Result(1)+PrimAmps(PrimAmp4_12345)%Result(1)+PrimAmps(PrimAmp4_15234)%Result(1)) )
-!       print *, "8.) subLC, Q_q term:",dcmplx(mydummy(1)*dsqrt(2d0))!,mydummy(1)*dsqrt(2d0)! 0.495491782923673! -9.830428212092179E-002 +I*(  0.485642229487480      )
-!
-!
-!       mydummy(1) = PrimAmps(PrimAmp2m_15234)%Result(-2)
-!       print *, "9a.) top loop, Q_top term:",dcmplx(mydummy(1)*dsqrt(2d0))
-!       mydummy(1) = PrimAmps(PrimAmp2m_15234)%Result(-1)
-!       print *, "9a.) top loop, Q_top term:",dcmplx(mydummy(1)*dsqrt(2d0))
-!       mydummy(1) = PrimAmps(PrimAmp2m_15234)%Result(0)+PrimAmps(PrimAmp2m_15234)%Result(1)
-!       print *, "9a.) top loop, Q_top term:",dcmplx(mydummy(1)*dsqrt(2d0))
-!
-!
-!       mydummy(1) = PrimAmps(PrimAmp2m_12354)%Result(-2)
-!       print *, "9b.) top loop, Q_q term:",dcmplx(mydummy(1)*dsqrt(2d0))
-!       mydummy(1) = PrimAmps(PrimAmp2m_12354)%Result(-1)
-!       print *, "9b.) top loop, Q_q term:",dcmplx(mydummy(1)*dsqrt(2d0))
-!       mydummy(1) = PrimAmps(PrimAmp2m_12354)%Result(0)+PrimAmps(PrimAmp2m_12354)%Result(1)
-!       print *, "9b.) top loop, Q_q term:",dcmplx(mydummy(1)*dsqrt(2d0))
-!
-!
-! !       mydummy(1) = PrimAmps(PrimAmp2m_12534)%Result(-2)+PrimAmps(PrimAmp2m_12345)%Result(-2)+PrimAmps(PrimAmp2m_15234)%Result(-2)+PrimAmps(PrimAmp2m_12354)%Result(-2)
-! !       print *, "9c.) top loop, Q_f term:",dcmplx(mydummy(1)*dsqrt(2d0))
-! !       mydummy(1) = PrimAmps(PrimAmp2m_12534)%Result(-1)+PrimAmps(PrimAmp2m_12345)%Result(-1)+PrimAmps(PrimAmp2m_15234)%Result(-1)+PrimAmps(PrimAmp2m_12354)%Result(-1)
-! !       print *, "9c.) top loop, Q_f term:",dcmplx(mydummy(1)*dsqrt(2d0))
-! !       mydummy(1) = PrimAmps(PrimAmp2m_12534)%Result(0)+PrimAmps(PrimAmp2m_12345)%Result(0)+PrimAmps(PrimAmp2m_15234)%Result(0)+PrimAmps(PrimAmp2m_12354)%Result(0)+ PrimAmps(PrimAmp2m_12534)%Result(1)+PrimAmps(PrimAmp2m_12345)%Result(1)+PrimAmps(PrimAmp2m_15234)%Result(1)+PrimAmps(PrimAmp2m_12354)%Result(1)
-! !       print *, "9c.) top loop, Q_f term:",dcmplx(mydummy(1)*dsqrt(2d0))
-!
-!
-!
-!       mydummy(1) =  PrimAmps(PrimAmp2_15234)%Result(-2)
-!       print *, "10a.) light loops, Q_top term:",dcmplx(mydummy(1)*dsqrt(2d0)) * Nf_light
-!       mydummy(1) =  PrimAmps(PrimAmp2_15234)%Result(-1)
-!       print *, "10a.) light loops, Q_top term:",dcmplx(mydummy(1)*dsqrt(2d0)) * Nf_light
-!       mydummy(1) =  PrimAmps(PrimAmp2_15234)%Result(0)+PrimAmps(PrimAmp2_15234)%Result(1)
-!       print *, "10a.) light loops, Q_top term:",dcmplx(mydummy(1)*dsqrt(2d0)) * Nf_light
-!
-!
-!       mydummy(1) =  PrimAmps(PrimAmp2_12354)%Result(-2)
-!       print *, "10b.) light loops, Q_q term:",dcmplx(mydummy(1)*dsqrt(2d0)) * Nf_light
-!       mydummy(1) =  PrimAmps(PrimAmp2_12354)%Result(-1)
-!       print *, "10b.) light loops, Q_q term:",dcmplx(mydummy(1)*dsqrt(2d0)) * Nf_light
-!       mydummy(1) =  PrimAmps(PrimAmp2_12354)%Result(0)+PrimAmps(PrimAmp2_12354)%Result(1)
-!       print *, "10b.) light loops, Q_q term:",dcmplx(mydummy(1)*dsqrt(2d0)) * Nf_light
-!
-!
-! !       mydummy(1) =  PrimAmps(PrimAmp2_12534)%Result(-2)+PrimAmps(PrimAmp2_12345)%Result(-2)+PrimAmps(PrimAmp2_15234)%Result(-2)+PrimAmps(PrimAmp2_12354)%Result(-2)
-! !       print *, "10c.) light loops, summme über Q_f terms:",dcmplx(mydummy(1)*dsqrt(2d0))*sumQlight
-! !       mydummy(1) =  PrimAmps(PrimAmp2_12534)%Result(-1)+PrimAmps(PrimAmp2_12345)%Result(-1)+PrimAmps(PrimAmp2_15234)%Result(-1)+PrimAmps(PrimAmp2_12354)%Result(-1)
-! !       print *, "10c.) light loops, summme über Q_f terms:",dcmplx(mydummy(1)*dsqrt(2d0))*sumQlight
-! !       mydummy(1) =  PrimAmps(PrimAmp2_12534)%Result(0)+PrimAmps(PrimAmp2_12345)%Result(0)+PrimAmps(PrimAmp2_15234)%Result(0)+PrimAmps(PrimAmp2_12354)%Result(0) &
-! !                  +  PrimAmps(PrimAmp2_12534)%Result(1)+PrimAmps(PrimAmp2_12345)%Result(1)+PrimAmps(PrimAmp2_15234)%Result(1)+PrimAmps(PrimAmp2_12354)%Result(1)
-! !       print *, "10c.) light loops, summme über Q_f terms:",dcmplx(mydummy(1)*dsqrt(2d0))*sumQlight
-!       pause
-   enddo!helicity loop
-  enddo! npdf loop
+  enddo!helicity loop
+enddo! npdf loop
   call swapMom(MomExt(1:4,1),MomExt(1:4,2))   ! swap back to original order, for ID below
 ! print *, "mom swap deactivated"
 ENDIF
 
-
+print *, "LO Res UnPol",LO_Res_UnPol
+print *, "(Bosonic loops)/LO, DP",NLO_Res_UnPol(-2)/LO_Res_UnPol
+print *, "(Bosonic loops)/LO, SP",NLO_Res_UnPol(-1)/LO_Res_UnPol
+print *, "(Bosonic loops)/LO, fin",(NLO_Res_UnPol(0)+NLO_Res_UnPol(1))/LO_Res_UnPol
+print *, "(fermionic loops)/LO, DP",NLO_Res_UnPol_Ferm(-2)/LO_Res_UnPol
+print *, "(fermionic loops)/LO, SP",NLO_Res_UnPol_Ferm(-1)/LO_Res_UnPol
+print *, "(fermionic loops)/LO, fin",(NLO_Res_UnPol_Ferm(0)+NLO_Res_UnPol_Ferm(1))/LO_Res_UnPol
+print *, "(Bosonic+fermionic loops)/LO, DP", (NLO_Res_UnPol(-2)+NLO_Res_UnPol_Ferm(-2))/LO_Res_UnPol
+print *, "(Bosonic+fermionic loops)/LO, SP", (NLO_Res_UnPol(-1)+NLO_Res_UnPol_Ferm(-1))/LO_Res_UnPol
+print *, "(Bosonic+fermionic loops)/LO, fin",(NLO_Res_UnPol(0)+NLO_Res_UnPol(1)+NLO_Res_UnPol_Ferm(0)+NLO_Res_UnPol_Ferm(1))/LO_Res_UnPol
+stop
 
 
 IF( CORRECTION.EQ.0 ) THEN
