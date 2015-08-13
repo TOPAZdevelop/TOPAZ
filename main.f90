@@ -544,7 +544,7 @@ integer TheUnit
         write(TheUnit,'(A,F10.5)') "# gL_Zpr(dn_)=",gL_Zpr(dn_)
         write(TheUnit,'(A,F10.5)') "# gR_Zpr(dn_)=",gR_Zpr(dn_)
     endif
-    if ( (ObsSet.ge.50 .and. ObsSet.le.59) .or. (ObsSet.ge.70 .and. ObsSet.le.79) ) then
+    if ( (ObsSet.ge.50 .and. ObsSet.le.59) .or. (ObsSet.ge.70 .and. ObsSet.le.79) .or. (ObsSet .ge. 20 .and. ObsSet .le. 30)) then
        write(TheUnit,"(A,I2)") "# Z Decays=",ZDecays
        write(TheUnit,'(A,F10.5)') '# DeltaF1V=',DeltaF1V
        write(TheUnit,'(A,F10.5)') '# DeltaF1A=',DeltaF1A
