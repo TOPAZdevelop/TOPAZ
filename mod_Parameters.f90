@@ -14,7 +14,7 @@ logical, public :: unweighted
 logical, public :: HelSampling
 logical, public :: FirstLOThenVI
 integer, public :: DKRE_switch
-integer, public, save :: ColorlessTag=1   !  1=SM Z, 2=SM+BSM Z, 3=SM+BSM Higgs
+integer, public, save :: ColorlessTag=2   !  1=SM Z, 2=SM+BSM Z, 3=SM+BSM Higgs
 integer(8), public, save :: EvalCounter=0
 integer(8), public, save :: PSCutCounter=0
 integer(8), public, save :: SkipCounter=0
@@ -567,6 +567,13 @@ ENDIF
 
    couplZTT_left2_dyn =couplZTT_left2
    couplZTT_right2_dyn=couplZTT_right2
+
+!  here we set the dynamic sigma coupling used in the currents for the ttb+photon
+! this coupling should really be renamed...
+   if (Process.ge.81 .and. Process.le.89 ) then
+      couplZTT_left2_dyn=couplGaTT_left2
+      couplZTT_right2_dyn=couplGaTT_right2
+   endif
    
    r2 = (M_Z/(2*4.6d0*GeV))**2! mass correction for bottom quark
    ZWidth = alpha/12d0*M_Z * (  +((couplZUU_left+couplZUU_right)**2 + (couplZUU_left-couplZUU_right)**2 *1d0 )*3d0 &! up
