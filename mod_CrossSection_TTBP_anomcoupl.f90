@@ -493,11 +493,9 @@ ELSEIF( Correction.EQ.1 ) THEN
          enddo
          NLO_Res_UnPol_Ferm(-2:1) = NLO_Res_UnPol_Ferm(-2:1) + NLO_Res_Pol(-2:1)
 
-! RR DEBUG: still need to implement this
-!   call Gamma5Renorm_gg(MomExt(1:4,12:13),BornAmps,RenormAmps,Ren_Res_Pol)
-!   Ren_Res_UnPol=Ren_Res_UnPol + Ren_Res_Pol
-
-
+! gamma-5 renormalization -- only needed for dipole-like couplings
+         call Gamma5Renorm_ggphoton(BornAmps,RenormAmps,Ren_Res_Pol)
+         Ren_Res_UnPol=Ren_Res_UnPol + Ren_Res_Pol
 
       enddo! helicity loop
    ENDIF
@@ -523,6 +521,7 @@ ELSEIF( Correction.EQ.1 ) THEN
 
 
 print *, "LO Res UnPol",LO_Res_UnPol
+print *, "Gamma5 renorm/LO",Ren_Res_UnPol/LO_Res_UnPol
 print *,"renorm/LO", HOO_Ren_Res_UnPol/LO_Res_UnPol
 
 print *, "(Bosonic loops)/LO, DP",NLO_Res_UnPol(-2)/LO_Res_UnPol
@@ -546,6 +545,7 @@ stop
    NLO_Res_UnPol_Ferm(-1) = NLO_Res_UnPol_Ferm(-1) - (-2d0/3d0*Nf_light)*LO_Res_Unpol
    NLO_Res_UnPol( 0) = NLO_Res_UnPol( 0) + (-5d0/2d0*8d0/3d0 )*LO_Res_Unpol   ! finite contribution from top WFRC's
    NLO_Res_UnPol( 0) = NLO_Res_UnPol( 0) + LO_Res_Unpol  ! shift alpha_s^DR --> alpha_s^MSbar
+   NLO_Res_UnPol( 0) = NLO_Res_UnPol(0)  - Ren_Res_UnPol*2d0   ! Raoul's gamma5 ren -- should only be for non-SM couplings
 
 
 
@@ -656,7 +656,7 @@ real(8) :: DPtol, QPtol,PObs(1:NumMaxHisto)
 real(8) :: Ren_Res_Pol,Ren_Res_UnPol,R_V,R_A,prim_opp_err(1:10)
 real(8) :: tau,eta1,eta2,sHatJacobi,PreFac,FluxFac,PDFFac_a(1:2),PDFFac_b(1:2),PDFFac(1:2),pdf(-6:6,1:2)
 integer :: NHisto,NBin(1:NumMaxHisto),npdf,ParityFlip=1,PhotonCouplCorr=2d0,nHel(1:2),NRndHel,npdfmin,npdfmax
-complex(8) :: RenormAmps(14),HOORenormPartAmp(1:2),HOO_RenormAmp(1:NumPrimAmps),HOO_RenormPartAmp(1:2),HOO_Ren_Res_Pol,HOO_Ren_Res_UnPol
+complex(8) :: RenormAmps(1:2),HOORenormPartAmp(1:2),HOO_RenormAmp(1:NumPrimAmps),HOO_RenormPartAmp(1:2),HOO_Ren_Res_Pol,HOO_Ren_Res_UnPol
 integer,parameter :: up=1,dn=2
 include 'misc/global_import'
 include "vegas_common.f"
@@ -885,7 +885,6 @@ ELSEIF( CORRECTION.EQ.1 ) THEN
 
            if ( AccPoles .gt. DPtol .or. prim_opp_err(APrimAmp) .gt. 1d-2) then
               useQP=useQP+1
-              print *, "QP",AccPoles,prim_opp_err(APrimAmp)
               PrimAmps(APrimAmp)%Result=(0d0,0d0)
               do jPrimAmp=APrimAmp,APrimAmp+LocalSisters(iPrimAmp)
                  call SetKirill(PrimAmps(jPrimAmp))
@@ -908,7 +907,6 @@ ELSEIF( CORRECTION.EQ.1 ) THEN
               
               AccPoles = CheckPoles(PrimAmps(APrimAmp),BornAmps(APrimAmp),rdiv(1:2))
               prim_opp_err(APrimAmp)=opp_err
-              print *, AccPoles,prim_opp_err(APrimAmp)
               if ( AccPoles .gt. QPtol .or. prim_opp_err(APrimAmp) .gt. 1d-2) then
                  print *, 'QP fails: ', AccPoles, prim_opp_err(APrimAmp)
                  PrimAmps(APrimAmp)%Result=0d0
@@ -1044,6 +1042,12 @@ ELSEIF( CORRECTION.EQ.1 ) THEN
                                             + dreal(LOPartAmp(dn)*dconjg(FermionPartAmp(dn,-2:1)))*PDFFac(dn) )
      NLO_Res_UnPol_Ferm(-2:1) = NLO_Res_UnPol_Ferm(-2:1) + NLO_Res_Pol(-2:1)
 
+   call Gamma5Renorm_qqbphoton(BornAmps,RenormAmps)
+   Ren_Res_Pol = 4d0/3d0*ColLO_ttbqqb(1,1) * dreal( LOPartAmp(up)*dconjg(RenormAmps(up))*PDFFac(up) + LOPartAmp(dn)*dconjg(RenormAmps(dn))*PDFFac(dn) )     ! 4/3=CF is vertex color factor
+   Ren_Res_UnPol=Ren_Res_UnPol + Ren_Res_Pol
+
+
+
   enddo!helicity loop
 enddo! npdf loop
   call swapMom(MomExt(1:4,1),MomExt(1:4,2))   ! swap back to original order, for ID below
@@ -1051,6 +1055,8 @@ enddo! npdf loop
 ENDIF
 
 print *, "LO Res UnPol",LO_Res_UnPol
+print *, "Gamma5 renorm/LO",Ren_Res_UnPol/LO_Res_UnPol
+print *,"renorm/LO", HOO_Ren_Res_UnPol/LO_Res_UnPol
 print *, "(Bosonic loops)/LO, DP",NLO_Res_UnPol(-2)/LO_Res_UnPol
 print *, "(Bosonic loops)/LO, SP",NLO_Res_UnPol(-1)/LO_Res_UnPol
 print *, "(Bosonic loops)/LO, fin",(NLO_Res_UnPol(0)+NLO_Res_UnPol(1))/LO_Res_UnPol
@@ -5252,7 +5258,6 @@ END FUNCTION
 ! Output : array of counterterm amps (= LO amps with C1V=C1A=0)
 !          interference between CTamps and BornAmps, incl color factor CF
 !NB: this last NOT summed over helicity! So this routine should be called INSIDE a helicity sum.f
-    use ModZDecay
     use ModProcess
     use ModParameters
     use ModAmplitudes
@@ -5294,7 +5299,6 @@ END FUNCTION
 !        : momenta of leptons, needed only for calling of ZDecay (which redefines the dyn coupl)
 ! Output : array of counterterm amps (= LO amps with C1V=C1A=0)
 ! differences with gg channel: combination into Z on qqb and ttb line; color factors; interference with Born not computed
-    use ModZDecay
     use ModProcess
     use ModParameters
     use ModAmplitudes
@@ -5322,6 +5326,82 @@ END FUNCTION
     call RetrieveTopCouplings 
       
   end subroutine SigmaRenorm_qqbphoton
+
+  subroutine Gamma5Renorm_ggphoton(TheBornAmps,RenormAmps,Renorm_Res)
+! Counterterm to renormalize gamma-5 in D-dim in gg channels
+! Input  : array of BornAmps
+! Output : array of counterterm amps (= LO amps with C1V=C2V=0)
+!          interference between CTamps and BornAmps, incl color factor CF
+!NB: this last NOT summed over helicity! So this routine should be called INSIDE a helicity sum.
+    use ModProcess
+    use ModParameters
+    use ModAmplitudes
+    implicit none
+    type(BornAmplitude),target :: TheBornAmps(1:NumBornAmps)
+    complex(8)  :: RenormAmps(1:NumBornAmps)
+    real(8)     :: Renorm_Res
+    integer     :: iPrimAmp,jPrimAmp
+       
+
+    call StoreTopCouplings
+! set all vector couplings to zero => L = A, R = -A
+    couplZTT_left_dyn  = 0d0
+    couplZTT_right_dyn = 0d0
+    couplZTT_left2_dyn =   couplGaTT_A2
+    couplZTT_right2_dyn = -couplGaTT_A2
+    Q_Top=0d0
+
+    do iPrimAmp=1,NumBornAmps
+       call EvalTree2(BornAmps(iPrimAmp)%TreeProc,RenormAmps(iPrimAmp))
+    enddo
+    
+    Renorm_Res=0d0
+    do jPrimAmp=1,2
+       do iPrimAmp=1,2
+          !  incl CF factor from vertex correction.
+          Renorm_Res =Renorm_Res + 4d0/3d0*ColLO_ttbgg(iPrimAmp,jPrimAmp) * dreal(BornAmps(iPrimAmp)%Result*dconjg(RenormAmps(jPrimAmp)))
+       enddo
+    enddo
+    
+    call RetrieveTopCouplings 
+
+  end subroutine Gamma5Renorm_ggphoton
+
+  
+  subroutine Gamma5Renorm_qqbphoton(TheBornAmps,RenormPartAmps)
+! Counterterm to renormalize gamma-5 in D-dim
+! Input  : array of BornAmps
+! Output : array of counterterm amps (= LO amps with C1V=0=C2V)
+!NB: this last NOT summed over helicity! So this routine should be called INSIDE a helicity sum.
+    use ModProcess
+    use ModParameters
+    use ModAmplitudes
+    implicit none
+    type(BornAmplitude),target :: TheBornAmps(1:NumBornAmps)
+    integer,parameter :: up=1,dn=2
+    complex(8)  :: RenormAmps(1:2),RenormPartAmps(1:2)
+    integer     :: iPrimAmp,jPrimAmp
+    
+    call StoreTopCouplings
+
+! set all vector couplings to zero => L = A, R = -A    
+    couplZTT_left_dyn  = 0d0
+    couplZTT_right_dyn = 0d0
+    couplZTT_left2_dyn =   couplGaTT_A2
+    couplZTT_right2_dyn = -couplGaTT_A2
+    Q_Top=0d0
+
+    iPrimAmp=1
+    call EvalTree2(BornAmps(iPrimAmp)%TreeProc,RenormAmps(iPrimAmp))
+        
+! don't include amplitudes with Z attached to qqb line
+    RenormPartAmps(up)=RenormAmps(1)
+    RenormPartAmps(dn)=RenormAmps(1)
+      
+    call RetrieveTopCouplings 
+
+  end subroutine Gamma5Renorm_qqbphoton
+
 
 
   subroutine StoreTopCouplings
