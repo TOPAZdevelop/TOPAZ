@@ -182,12 +182,13 @@ ELSEIF( Correction.EQ.1 ) THEN
       enddo
       LO_Res_UnPol = LO_Res_UnPol + LO_Res_Pol
 
-!!!! RR Higher Order Operator -- i.e. sigma_{mu,nu} q^{nu} --  renorm term
-!!!! DEBUG: this function still to be written
-!      if (nonrenormcoupl) then
-!         call SigmaRenorm_gg(MomExt(1:4,12:13),BornAmps,HOO_RenormAmps,HOO_Ren_Res_Pol)
-!         HOO_Ren_Res_UnPol=HOO_Ren_Res_UnPol + HOO_Ren_Res_Pol
-!      endif
+! Higher Order Operator -- i.e. sigma_{mu,nu} q^{nu} --  renorm term
+
+      if (nonrenormcoupl) then
+         call SigmaRenorm_ggphoton(BornAmps,HOO_RenormAmps,HOO_Ren_Res_Pol)
+         HOO_Ren_Res_UnPol=HOO_Ren_Res_UnPol + HOO_Ren_Res_Pol
+      endif
+
 
       ListPrimAmps=(/1,2,3,5,7,10,13,16,19,20,21,24,27,28,29,31,33,35/)
 
@@ -247,19 +248,15 @@ ELSEIF( Correction.EQ.1 ) THEN
 !! --- end
           
 
-
 ! RR REMOVE -- overwrite poles with analytic value to check SP
 !          print *, 'overwriting single poles with analytic result'
 !          PrimAmps(APrimAmp)%Result(-1)=rdiv(1)*BornAmps(APrimAmp)%Result
-!          print *, 'LO',BornAmps(APrimAmp)%Result
-!          print *, 'diff', APrimAmp,PrimAmps(APrimAmp)%Result(-1)/BornAmps(APrimAmp)%Result-rdiv(1)
-!          pause
-
 
           AccPoles = CheckPoles(PrimAmps(APrimAmp),BornAmps(APrimAmp),rdiv(1:2))
 
 ! QP 
           if ( AccPoles .gt. DPtol ) then
+!             print *,"using qp"
              useQP=useQP+1
 !             QPredo(iPrimAmp,1)=APrimAmp
 !             QPredo(iPrimAmp,2:PrimAmps(APrimAmp)%NumSisters+1)=PrimAmps(APrimAmp)%Sisters(1:PrimAmps(APrimAmp)%NumSisters)
@@ -317,6 +314,7 @@ ELSEIF( Correction.EQ.1 ) THEN
                 RETURN ! reject the whole event instead of just this primamp
              endif
           endif! QP
+
 
        enddo! iPrimAmp
 
@@ -505,7 +503,28 @@ ELSEIF( Correction.EQ.1 ) THEN
    ENDIF
 
 
+
+IF( Correction.EQ.0 ) THEN
+!  normalization
 print *, "LO Res UnPol",LO_Res_UnPol
+stop
+
+   LO_Res_Unpol = LO_Res_Unpol * ISFac * (alpha_s4Pi*RunFactor)**2 *alpha4Pi* WidthExpansion
+   EvalCS_anomcoupl_1L_ttbggp = LO_Res_Unpol * PreFac
+
+ELSEIF( Correction.EQ.1 ) THEN
+
+   if (nonrenormcoupl) then
+      NLO_Res_UnPol(-1)=NLO_Res_UnPol(-1)+HOO_Ren_Res_UnPol
+      NLO_Res_UnPol(0) =NLO_Res_UnPol(0) +dlog(MuRen**2/TTBZ_MassScale**2)*HOO_Ren_Res_UnPol
+   endif
+
+
+
+
+print *, "LO Res UnPol",LO_Res_UnPol
+print *,"renorm/LO", HOO_Ren_Res_UnPol/LO_Res_UnPol
+
 print *, "(Bosonic loops)/LO, DP",NLO_Res_UnPol(-2)/LO_Res_UnPol
 print *, "(Bosonic loops)/LO, SP",NLO_Res_UnPol(-1)/LO_Res_UnPol
 print *, "(Bosonic loops)/LO, fin",(NLO_Res_UnPol(0)+NLO_Res_UnPol(1))/LO_Res_UnPol
@@ -519,12 +538,6 @@ stop
 
 
 
-IF( Correction.EQ.0 ) THEN
-!  normalization
-   LO_Res_Unpol = LO_Res_Unpol * ISFac * (alpha_s4Pi*RunFactor)**2 *alpha4Pi* WidthExpansion
-   EvalCS_anomcoupl_1L_ttbggp = LO_Res_Unpol * PreFac
-
-ELSEIF( Correction.EQ.1 ) THEN
 !  overall normalization: (4*Pi)^eps/Gamma(1-eps)
 !  CT contributions
                          ! beta        !top WFRC
@@ -534,10 +547,7 @@ ELSEIF( Correction.EQ.1 ) THEN
    NLO_Res_UnPol( 0) = NLO_Res_UnPol( 0) + (-5d0/2d0*8d0/3d0 )*LO_Res_Unpol   ! finite contribution from top WFRC's
    NLO_Res_UnPol( 0) = NLO_Res_UnPol( 0) + LO_Res_Unpol  ! shift alpha_s^DR --> alpha_s^MSbar
 
-!  factor out (Mu2/mTop**2)^eps
-!    NLO_Res_UnPol( 0) = NLO_Res_UnPol( 0) + NLO_Res_UnPol(-1)*2d0*dlog(m_top/MuRen) + NLO_Res_UnPol(-2)*dlog(m_top/MuRen)**2
-!    NLO_Res_UnPol(-1) = NLO_Res_UnPol(-1) + NLO_Res_UnPol(-2)*2d0*dlog(m_top/MuRen)
-!    NLO_Res_UnPol_Ferm(0) = NLO_Res_UnPol_Ferm(0) + NLO_Res_UnPol_Ferm(-1)*2d0*dlog(m_top/MuRen)
+
 
 !  normalization
    LO_Res_Unpol = LO_Res_Unpol                         * ISFac * (alpha_s4Pi*RunFactor)**2                            * alpha4Pi
@@ -663,7 +673,7 @@ include "vegas_common.f"
   opp_err=0d0
   prim_opp_err=0d0
 
-  if (cdabs(couplZTT_V2) .ge. 1d-7 .or. cdabs(couplZTT_A2) .ge. 1d-7) then
+  if (cdabs(couplGaTT_V2) .ge. 1d-7 .or. cdabs(couplGaTT_A2) .ge. 1d-7) then
      nonrenormcoupl=.true.
   else
      nonrenormcoupl=.false.
@@ -814,12 +824,12 @@ ELSEIF( CORRECTION.EQ.1 ) THEN
 
 
 !!!! RR Higher Order Operator -- i.e. sigma_{mu,nu} q^{nu} --  renorm term ??????
-!        if (nonrenormcoupl) then
-!           call SigmaRenorm_qqb(MomExt(1:4,12:13),BornAmps,HOO_RenormAmp,HOO_RenormPartAmp)
+        if (nonrenormcoupl) then
+           call SigmaRenorm_qqbphoton(BornAmps,HOO_RenormAmp,HOO_RenormPartAmp)
            !  incl CF factor from vertex correction.
-!           HOO_Ren_Res_Pol = 4d0/3d0*ColLO_ttbqqb(1,1) * dreal( LOPartAmp(up)*dconjg(HOO_RenormPartAmp(up))*PDFFac(up) + LOPartAmp(dn)*dconjg(HOO_RenormPartAmp(dn))*PDFFac(dn) )
-!           HOO_Ren_Res_UnPol=HOO_Ren_Res_UnPol + HOO_Ren_Res_Pol
-!        endif
+           HOO_Ren_Res_Pol = 4d0/3d0*ColLO_ttbqqb(1,1) * dreal( LOPartAmp(up)*dconjg(HOO_RenormPartAmp(up))*PDFFac(up) + LOPartAmp(dn)*dconjg(HOO_RenormPartAmp(dn))*PDFFac(dn) )
+           HOO_Ren_Res_UnPol=HOO_Ren_Res_UnPol + HOO_Ren_Res_Pol
+        endif
         
       ListPrimAmps=(/1,2,3,4,5,7,9,10,11,13,16,18/)
       LocalSisters=(/0,0,0,0,1,1,0,0, 1, 1, 0, 0/)
@@ -873,9 +883,9 @@ ELSEIF( CORRECTION.EQ.1 ) THEN
 
            AccPoles = CheckPoles(PrimAmps(iPrimAmp),BornAmps(iPrimAmp),rdiv(1:2))
 
-         
            if ( AccPoles .gt. DPtol .or. prim_opp_err(APrimAmp) .gt. 1d-2) then
               useQP=useQP+1
+              print *, "QP",AccPoles,prim_opp_err(APrimAmp)
               PrimAmps(APrimAmp)%Result=(0d0,0d0)
               do jPrimAmp=APrimAmp,APrimAmp+LocalSisters(iPrimAmp)
                  call SetKirill(PrimAmps(jPrimAmp))
@@ -898,8 +908,9 @@ ELSEIF( CORRECTION.EQ.1 ) THEN
               
               AccPoles = CheckPoles(PrimAmps(APrimAmp),BornAmps(APrimAmp),rdiv(1:2))
               prim_opp_err(APrimAmp)=opp_err
+              print *, AccPoles,prim_opp_err(APrimAmp)
               if ( AccPoles .gt. QPtol .or. prim_opp_err(APrimAmp) .gt. 1d-2) then
-                 !                print *, 'QP fails: ', AccPoles, prim_opp_err(APrimAmp)
+                 print *, 'QP fails: ', AccPoles, prim_opp_err(APrimAmp)
                  PrimAmps(APrimAmp)%Result=0d0
                  pole_skipped=pole_skipped+1               
                  SkipCounter = SkipCounter + 1
@@ -5229,6 +5240,128 @@ endif
 RETURN
 END FUNCTION
 
+
+
+
+! counter-term routines taken from similar routines in ttb+Z
+! maybe worthwhile having one routine for both ttb+Z and ttb+photon...
+
+  subroutine SigmaRenorm_ggphoton(TheBornAmps,RenormAmps,Renorm_Res)
+! UV counterterm to renormalize sigma-q couplings in gg channel
+! Input  : array of BornAmps
+! Output : array of counterterm amps (= LO amps with C1V=C1A=0)
+!          interference between CTamps and BornAmps, incl color factor CF
+!NB: this last NOT summed over helicity! So this routine should be called INSIDE a helicity sum.f
+    use ModZDecay
+    use ModProcess
+    use ModParameters
+    use ModAmplitudes
+    implicit none
+    type(BornAmplitude),target :: TheBornAmps(1:NumBornAmps)
+    complex(8)  :: RenormAmps(1:NumBornAmps)
+    real(8)     :: Renorm_Res
+    integer     :: iPrimAmp,jPrimAmp
+       
+
+    call StoreTopCouplings
+
+! now set the SM-like couplings to zero, and recalculate the LO amps
+    couplZTT_left_dyn  = 0d0
+    couplZTT_right_dyn = 0d0
+    Q_Top=0d0
+    
+    do iPrimAmp=1,NumBornAmps
+       call EvalTree2(BornAmps(iPrimAmp)%TreeProc,RenormAmps(iPrimAmp))
+    enddo
+    
+    Renorm_Res=0d0
+    do jPrimAmp=1,2
+       do iPrimAmp=1,2
+          !  incl CF factor from vertex correction.
+          Renorm_Res =Renorm_Res + 4d0/3d0*ColLO_ttbgg(iPrimAmp,jPrimAmp) * dreal(BornAmps(iPrimAmp)%Result*dconjg(RenormAmps(jPrimAmp)))
+       enddo
+    enddo
+    
+    call RetrieveTopCouplings 
+
+  end subroutine SigmaRenorm_ggphoton
+    
+
+
+  subroutine SigmaRenorm_qqbphoton(TheBornAmps,RenormAmps,RenormPartAmps)
+! UV counterterm to renormalize sigma-q couplings in qqb channel
+! Input  : array of BornAmps
+!        : momenta of leptons, needed only for calling of ZDecay (which redefines the dyn coupl)
+! Output : array of counterterm amps (= LO amps with C1V=C1A=0)
+! differences with gg channel: combination into Z on qqb and ttb line; color factors; interference with Born not computed
+    use ModZDecay
+    use ModProcess
+    use ModParameters
+    use ModAmplitudes
+    implicit none
+    type(BornAmplitude),target :: TheBornAmps(1:NumBornAmps)
+    integer,parameter :: up=1,dn=2
+    complex(8)  :: RenormAmps(1:NumBornAmps),RenormPartAmps(1:2)
+    integer     :: iPrimAmp,jPrimAmp
+       
+    call StoreTopCouplings
+
+! now set the SM-like couplings to zero, and recalculate the LO amps
+    couplZTT_left_dyn  = 0d0
+    couplZTT_right_dyn = 0d0
+    Q_Top=0d0
+    
+    do iPrimAmp=1,NumBornAmps
+       call EvalTree2(BornAmps(iPrimAmp)%TreeProc,RenormAmps(iPrimAmp))
+    enddo
+
+! don't include amplitudes with Z attached to qqb line
+    RenormPartAmps(up)=RenormAmps(1)
+    RenormPartAmps(dn)=RenormAmps(1)
+    
+    call RetrieveTopCouplings 
+      
+  end subroutine SigmaRenorm_qqbphoton
+
+
+  subroutine StoreTopCouplings
+    use ModParameters
+    implicit none
+    
+    couplZTT_left_dyn_store  = couplZTT_left_dyn
+    couplZTT_right_dyn_store = couplZTT_right_dyn
+    couplZTT_left2_dyn_store  = couplZTT_left2_dyn
+    couplZTT_right2_dyn_store = couplZTT_right2_dyn
+    
+    couplZTT_left_store  = couplZTT_left
+    couplZTT_left2_store  = couplZTT_left2
+    couplZTT_right_store = couplZTT_right
+    couplZTT_right2_store = couplZTT_right2
+
+    Q_Top_store = Q_Top
+    
+  end subroutine STORETOPCOUPLINGS
+  
+
+
+  subroutine RetrieveTopCouplings
+    use ModParameters
+    implicit none
+    
+    couplZTT_left_dyn   = couplZTT_left_dyn_store 
+    couplZTT_right_dyn  = couplZTT_right_dyn_store 
+    couplZTT_left2_dyn   = couplZTT_left2_dyn_store 
+    couplZTT_right2_dyn  = couplZTT_right2_dyn_store 
+    
+    couplZTT_left   = couplZTT_left_store 
+    couplZTT_left2   = couplZTT_left2_store 
+    couplZTT_right  = couplZTT_right_store 
+    couplZTT_right2  = couplZTT_right2_store
+
+    Q_Top = Q_Top_store
+    
+  end subroutine RetrieveTopCouplings
+  
 
 
 
