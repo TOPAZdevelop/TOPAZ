@@ -2769,8 +2769,8 @@ ELSEIF( PROCESS.EQ.82 ) THEN !   3_Str  + 4_Str  --> 1_ATop + 2_Top + 5_Pho ! tt
       AvgFactor = SpinAvg * QuarkColAvg * GluonColAvg
       NDim = NDim + 8    ! t tbar glu PS integration
       NDim = NDim + 2    ! shat integration
-      VegasNc0_default = 1000000
-      VegasNc1_default = 1000000
+      VegasNc0_default = 10000000
+      VegasNc1_default = 10000000
   ELSEIF( CORRECTION.EQ.3 ) THEN
       NumExtParticles = 5
       allocate(Crossing(1:NumExtParticles))
@@ -2781,8 +2781,8 @@ ELSEIF( PROCESS.EQ.82 ) THEN !   3_Str  + 4_Str  --> 1_ATop + 2_Top + 5_Pho ! tt
       NDim = NDim + 5    ! t tbar photon PS integration
       NDim = NDim + 2    ! shat integration
       NDim = NDim + 1    ! x integration
-      VegasNc0_default = 100000
-      VegasNc1_default = 100000
+      VegasNc0_default = 1000000
+      VegasNc1_default = 1000000
   ELSE
       call Error("Correction to this process is not available")
   ENDIF
@@ -2799,8 +2799,8 @@ ELSEIF( PROCESS.EQ.84 ) THEN !   4_AStr + 5_Glu  --> 3_AStr + 1_ATop + 2_Top + 6
       AvgFactor = SpinAvg * QuarkColAvg * GluonColAvg
       NDim = NDim + 8    ! t tbar glu photon PS integration
       NDim = NDim + 2    ! shat integration
-      VegasNc0_default = 1000000
-      VegasNc1_default = 1000000
+      VegasNc0_default = 10000000
+      VegasNc1_default = 10000000
   ELSEIF( CORRECTION.EQ.3 ) THEN
       NumExtParticles = 5
       allocate(Crossing(1:NumExtParticles))
@@ -2828,8 +2828,8 @@ ELSEIF( PROCESS.EQ.85 ) THEN !   3_Glu  + 4_Glu  --> 5_Glu  + 1_ATop + 2_Top + 6
       AvgFactor = SpinAvg * GluonColAvg**2
       NDim = NDim + 8    ! t tbar glu photon PS integration
       NDim = NDim + 2    ! shat integration
-      VegasNc0_default = 1000000
-      VegasNc1_default = 1000000
+      VegasNc0_default = 10000000
+      VegasNc1_default = 10000000
   ELSEIF( CORRECTION.EQ.3 ) THEN
       NumExtParticles = 5
       allocate(Crossing(1:NumExtParticles))
@@ -2858,8 +2858,8 @@ ELSEIF( PROCESS.EQ.86 ) THEN !   3_Str  + 4_AStr --> 5_Glu  + 1_ATop + 2_Top + 6
       AvgFactor = SpinAvg * QuarkColAvg**2
       NDim = NDim + 8    ! t tbar glu photon PS integration
       NDim = NDim + 2    ! shat integration
-      VegasNc0_default = 1000000
-      VegasNc1_default = 1000000
+      VegasNc0_default = 10000000
+      VegasNc1_default = 10000000
   ELSEIF( CORRECTION.EQ.3 ) THEN
       NumExtParticles = 5
       allocate(Crossing(1:NumExtParticles))
@@ -4689,6 +4689,22 @@ ELSEIF( MASTERPROCESS.EQ.19 ) THEN
       enddo
       enddo
       enddo
+    ELSEIF( TOPDECAYS.GE.1 .AND. ZDECAYS.EQ.-2 ) THEN
+       ! ttb+photon
+    NumHelicities = 16
+    allocate(Helicities(1:NumHelicities,1:NumExtParticles))
+      ih=1
+      do h3=-1,1,2! Z boson hel. Markus: rearranged for TTBZ_Speed=.true.
+      do h4=-1,1,2
+      do h5=-1,1,2
+      do h6=-1,1,2
+          if( ih.ge.17 ) cycle
+          Helicities(ih,1:6) = (/0,0,h6,h4,h5,h3/)
+          ih=ih+1
+      enddo
+      enddo
+      enddo
+      enddo
     ELSEIF( TOPDECAYS.EQ.0 .AND. ZDECAYS.EQ.0 ) then
     NumHelicities = 96
     allocate(Helicities(1:NumHelicities,1:NumExtParticles))
@@ -4700,6 +4716,26 @@ ELSEIF( MASTERPROCESS.EQ.19 ) THEN
       do h5=-1,1,2
       do h6=-1,1,1! Z boson hel
           if( ih.ge.97 ) cycle
+          Helicities(ih,1:6) = (/h1,h2,h3,h4,h5,h6/)
+          ih=ih+1
+      enddo
+      enddo
+      enddo
+      enddo
+      enddo
+      enddo
+    ELSEIF( TOPDECAYS.EQ.0 .AND. ZDECAYS.EQ.-2 ) then
+! ttb+photon
+    NumHelicities = 64
+    allocate(Helicities(1:NumHelicities,1:NumExtParticles))
+      ih=1
+      do h1=-1,1,2
+      do h2=-1,1,2
+      do h3=-1,1,2
+      do h4=-1,1,2
+      do h5=-1,1,2
+      do h6=-1,1,2! photon hel
+          if( ih.ge.65 ) cycle
           Helicities(ih,1:6) = (/h1,h2,h3,h4,h5,h6/)
           ih=ih+1
       enddo
@@ -4756,6 +4792,21 @@ ELSEIF( MASTERPROCESS.EQ.20 ) THEN
       enddo
       enddo
     ELSEIF( TOPDECAYS.GE.1 .AND. ZDECAYS.GE.1 ) THEN
+    NumHelicities = 16
+    allocate(Helicities(1:NumHelicities,1:NumExtParticles))
+      ih=1
+      do h3=-1,1,2! Z boson hel. Markus: rearranged for TTBZ_Speed=.true.
+      do h4=-1,1,2
+      do h5=-1,1,2
+      do h6=-1,1,2
+          if( ih.ge.17 ) cycle
+          Helicities(ih,1:6) = (/0,0,h6,h4,h5,h3/)
+          ih=ih+1
+      enddo
+      enddo
+      enddo
+      enddo
+    ELSEIF( TOPDECAYS.GE.1 .AND. ZDECAYS.EQ.-2 ) THEN
     NumHelicities = 16
     allocate(Helicities(1:NumHelicities,1:NumExtParticles))
       ih=1
