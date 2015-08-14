@@ -1270,6 +1270,14 @@ include "vegas_common.f"
    call EvalPhaseSpace_2to4(EHat,yRnd(3:10),MomExt(1:4,1:6),PSWgt)
    call boost2Lab(eta1,eta2,6,MomExt(1:4,1:6))
    ISFac = MomCrossing(MomExt(1:4,1:6))
+   print *, "NDim",NDim
+   print *,"p1",MomExt(1:4,1)
+   print *,"p2",MomExt(1:4,2)
+   print *,"p3",MomExt(1:4,3)
+   print *,"p4",MomExt(1:4,4)
+   print *,"p5",MomExt(1:4,5)
+   print *,"p6",MomExt(1:4,6)
+
 
    PSWgt2 = 1d0
    PSWgt3 = 1d0
@@ -1281,12 +1289,19 @@ IF( TopDecays.GE.1 ) THEN
    call TopDecay(ExtParticle(2),DK_LO,MomExt(1:4,10:12))
 ENDIF
 
+   print *,"p7",MomExt(1:4,7)
+   print *,"p8",MomExt(1:4,8)
+   print *,"p9",MomExt(1:4,9)
+   print *,"p10",MomExt(1:4,10)
+   print *,"p11",MomExt(1:4,11)
+   print *,"p12",MomExt(1:4,12)
+
+
    call CheckSing(MomExt,applySingCut)
    if( applySingCut ) then
        EvalCS_anomcoupl_Real_ttbgggp = 0d0
        return
    endif
-
    call Kinematics_TTBARPHOTON(1,MomExt(1:4,1:12),(/5,6,4,1,2,3,7,8,9,10,11,12/),applyPSCut,NBin)
 
    call setPDFs(eta1,eta2,MuFac,pdf)
@@ -1305,7 +1320,7 @@ ENDIF
           do iPrimAmp=1,NumBornAmps
               call EvalTree(BornAmps(iPrimAmp))
           enddo
-
+          
           LO_Res_Pol = (0d0,0d0)
           do jPrimAmp=1,6
           do iPrimAmp=1,6
@@ -1315,7 +1330,10 @@ ENDIF
           LO_Res_UnPol = LO_Res_UnPol + LO_Res_Pol
         enddo!helicity loop
 
-        LO_Res_Unpol = LO_Res_Unpol * ISFac * (alpha_s4Pi*RunFactor)**3 * Q_top**2*alpha4Pi  *PhotonCouplCorr
+        LO_Res_Unpol = LO_Res_Unpol * ISFac * (alpha_s4Pi*RunFactor)**3 * alpha4Pi
+        print *, "gg->g ttb photon",LO_Res_UnPol
+  
+        stop
         EvalCS_anomcoupl_Real_ttbgggp = LO_Res_Unpol * PreFac
 
         do NHisto=1,NumHistograms
@@ -1324,7 +1342,7 @@ ENDIF
 endif!applyPSCut
 
 
-    PreFac = PreFac * ISFac * (alpha_s4Pi*RunFactor)**3 * Q_top**2*alpha4Pi*PhotonCouplCorr /PSWgt2/PSWgt3
+    PreFac = PreFac * ISFac * (alpha_s4Pi*RunFactor)**3 *alpha4Pi /PSWgt2/PSWgt3
     call EvalDipoles_GGTTBGP((/MomExt(1:4,5),MomExt(1:4,4),MomExt(1:4,6),-MomExt(1:4,1),-MomExt(1:4,2),MomExt(1:4,3)/),yRnd(11:18),PreFac,DipoleResult)
 
 !      sij = 2d0*(MomExt(1:4,1).dot.MomExt(1:4,3))
@@ -1407,20 +1425,38 @@ EvalCS_anomcoupl_Dips_ttbqqbgp= 0d0
        call EvalPhasespace_TopDecay(MomExt(1:4,6),yRnd(15:18),.false.,MomExt(1:4,10:12),PSWgt3)
        PSWgt = PSWgt * PSWgt2*PSWgt3
    ENDIF
+
+   print *, "NDim",NDim
+   print *,"p1",MomExt(1:4,1)
+   print *,"p2",MomExt(1:4,2)
+   print *,"p3",MomExt(1:4,3)
+   print *,"p4",MomExt(1:4,4)
+   print *,"p5",MomExt(1:4,5)
+   print *,"p6",MomExt(1:4,6)
+   print *,"p7",MomExt(1:4,7)
+   print *,"p8",MomExt(1:4,8)
+   print *,"p9",MomExt(1:4,9)
+   print *,"p10",MomExt(1:4,10)
+   print *,"p11",MomExt(1:4,11)
+   print *,"p12",MomExt(1:4,12)
+
    call Kinematics_TTBARPHOTON(1,MomExt(1:4,1:12),(/5,6,4,1,2,3,7,8,9,10,11,12/),applyPSCut,NBin)
 
    call setPDFs(eta1,eta2,MuFac,pdf)
-   IF( PROCESS.EQ.30 ) THEN
+!   IF( PROCESS.EQ.30 ) THEN
+   IF( PROCESS.EQ.86 ) THEN
       PDFFac_a(up) = pdf(Up_,1)*pdf(AUp_,2) + pdf(Chm_,1)*pdf(AChm_,2)
       PDFFac_a(dn) = pdf(Dn_,1)*pdf(ADn_,2) + pdf(Str_,1)*pdf(AStr_,2) + pdf(Bot_,1)*pdf(ABot_,2)
       PDFFac_b(up) = pdf(Up_,2)*pdf(AUp_,1) + pdf(Chm_,2)*pdf(AChm_,1)
       PDFFac_b(dn) = pdf(Dn_,2)*pdf(ADn_,1) + pdf(Str_,2)*pdf(AStr_,1) + pdf(Bot_,2)*pdf(ABot_,1)
-   ELSEIF( PROCESS.EQ.24 ) THEN
+!   ELSEIF( PROCESS.EQ.24 ) THEN
+   ELSEIF( PROCESS.EQ.83 ) THEN
       PDFFac_a(up) = pdf(Up_,1)*pdf(0,2) + pdf(Chm_,1)*pdf(0,2)
       PDFFac_a(dn) = pdf(Dn_,1)*pdf(0,2) + pdf(Str_,1)*pdf(0,2) + pdf(Bot_,1)*pdf(0,2)
       PDFFac_b(up) = pdf(Up_,2)*pdf(0,1) + pdf(Chm_,2)*pdf(0,1)
       PDFFac_b(dn) = pdf(Dn_,2)*pdf(0,1) + pdf(Str_,2)*pdf(0,1) + pdf(Bot_,2)*pdf(0,1)
-   ELSEIF( PROCESS.EQ.26 ) THEN
+!   ELSEIF( PROCESS.EQ.26 ) THEN
+   ELSEIF( PROCESS.EQ.84 ) THEN
       PDFFac_a(up) = pdf(AUp_,1)*pdf(0,2) + pdf(AChm_,1)*pdf(0,2)
       PDFFac_a(dn) = pdf(ADn_,1)*pdf(0,2) + pdf(AStr_,1)*pdf(0,2) + pdf(ABot_,1)*pdf(0,2)
       PDFFac_b(up) = pdf(AUp_,2)*pdf(0,1) + pdf(AChm_,2)*pdf(0,1)
@@ -1450,6 +1486,8 @@ EvalCS_anomcoupl_Dips_ttbqqbgp= 0d0
           call TopDecay(ExtParticle(2),DK_LO,MomExt(1:4,10:12))
         ENDIF
 
+        couplZQQ_left_dyn=one
+        couplZQQ_right_dyn=one                  
 
 if( applyPSCut ) then
             EvalCS_anomcoupl_Real_ttbqqbgp = 0d0
@@ -1458,16 +1496,16 @@ else
         do iHel=1,NumHelicities
           call HelCrossing(Helicities(iHel,1:NumExtParticles))
           call SetPolarizations()
-
-          do iPrimAmp=1,NumBornAmps
+          
+          do iPrimAmp=1,NumBornAmps           
               call EvalTree(BornAmps(iPrimAmp))
           enddo
 
           Q_in = Q_up
-          PartAmp(1) = BornAmps(PrimAmp1_162345)%Result + Q_in/Q_top*BornAmps(PrimAmp1_123645)%Result
-          PartAmp(3) = BornAmps(PrimAmp1_162534)%Result + Q_in/Q_top*BornAmps(PrimAmp1_125364)%Result
-          PartAmp(2) = BornAmps(PrimAmp1_156234)%Result + BornAmps(PrimAmp1_165234)%Result + Q_in/Q_top*BornAmps(PrimAmp1_152364)%Result
-          PartAmp(4) = BornAmps(PrimAmp1_162354)%Result + Q_in/Q_top*BornAmps(PrimAmp1_123564)%Result + Q_in/Q_top*BornAmps(PrimAmp1_123654)%Result
+          PartAmp(1) = BornAmps(PrimAmp1_162345)%Result + Q_in*BornAmps(PrimAmp1_123645)%Result
+          PartAmp(2) = BornAmps(PrimAmp1_165234)%Result + Q_in*BornAmps(PrimAmp1_152364)%Result
+          PartAmp(3) = BornAmps(PrimAmp1_162534)%Result + Q_in*BornAmps(PrimAmp1_125364)%Result
+          PartAmp(4) = BornAmps(PrimAmp1_162354)%Result + Q_in*BornAmps(PrimAmp1_123654)%Result
           LO_Res_Pol = (0d0,0d0)
           do jPrimAmp=1,4
           do iPrimAmp=1,4
@@ -1477,10 +1515,10 @@ else
           LO_Res_UnPol = LO_Res_UnPol + LO_Res_Pol * PDFFac(1)
 
           Q_in = Q_dn
-          PartAmp(1) = BornAmps(PrimAmp1_162345)%Result + Q_in/Q_top*BornAmps(PrimAmp1_123645)%Result
-          PartAmp(3) = BornAmps(PrimAmp1_162534)%Result + Q_in/Q_top*BornAmps(PrimAmp1_125364)%Result
-          PartAmp(2) = BornAmps(PrimAmp1_156234)%Result + BornAmps(PrimAmp1_165234)%Result + Q_in/Q_top*BornAmps(PrimAmp1_152364)%Result
-          PartAmp(4) = BornAmps(PrimAmp1_162354)%Result + Q_in/Q_top*BornAmps(PrimAmp1_123564)%Result + Q_in/Q_top*BornAmps(PrimAmp1_123654)%Result
+          PartAmp(1) = BornAmps(PrimAmp1_162345)%Result + Q_in*BornAmps(PrimAmp1_123645)%Result
+          PartAmp(2) = BornAmps(PrimAmp1_165234)%Result + Q_in*BornAmps(PrimAmp1_152364)%Result
+          PartAmp(3) = BornAmps(PrimAmp1_162534)%Result + Q_in*BornAmps(PrimAmp1_125364)%Result
+          PartAmp(4) = BornAmps(PrimAmp1_162354)%Result + Q_in*BornAmps(PrimAmp1_123654)%Result
           LO_Res_Pol = (0d0,0d0)
           do jPrimAmp=1,4
           do iPrimAmp=1,4
@@ -1495,7 +1533,9 @@ else
 ! pause
 
 
-        LO_Res_Unpol = LO_Res_Unpol * ISFac * (alpha_s4Pi*RunFactor)**3 * Q_top**2*alpha4Pi  *PhotonCouplCorr
+        LO_Res_Unpol = LO_Res_Unpol * ISFac * (alpha_s4Pi*RunFactor)**3 * alpha4Pi
+        print *, "LO unpol",LO_Res_UnPol
+        stop
         EvalCS_anomcoupl_Real_ttbqqbgp = EvalCS_anomcoupl_Real_ttbqqbgp + dble(LO_Res_Unpol*PreFac)
 
         do NHisto=1,NumHistograms
@@ -1504,11 +1544,14 @@ else
 endif!applyPSCut
 
     PreFacDip = PreFac * ISFac * (alpha_s4Pi*RunFactor)**3 * Q_top**2*alpha4Pi*PhotonCouplCorr /PSWgt2/PSWgt3
-    IF( PROCESS.EQ.30 ) THEN
+!    IF( PROCESS.EQ.30 ) THEN
+    IF( PROCESS.EQ.86 ) THEN
         call EvalDipoles_QQBTTBGP((/MomExt(1:4,5),MomExt(1:4,4),MomExt(1:4,6),-MomExt(1:4,1),-MomExt(1:4,2),MomExt(1:4,3)/),yRnd(11:18),(/PreFacDip*PDFFac(1),PreFacDip*PDFFac(2)/),DipoleResult)
-    ELSEIF( PROCESS.EQ.24 ) THEN
+!    ELSEIF( PROCESS.EQ.24 ) THEN
+    ELSEIF( PROCESS.EQ.83 ) THEN
         call EvalDipoles_QGTTBQP((/MomExt(1:4,5),MomExt(1:4,4),MomExt(1:4,6),-MomExt(1:4,1),MomExt(1:4,3),-MomExt(1:4,2)/),yRnd(11:18),(/PreFacDip*PDFFac(1),PreFacDip*PDFFac(2)/),DipoleResult)
-    ELSEIF( PROCESS.EQ.26 ) THEN
+!    ELSEIF( PROCESS.EQ.26 ) THEN
+    ELSEIF( PROCESS.EQ.84 ) THEN
         call EvalDipoles_QBGTTBQBP((/MomExt(1:4,5),MomExt(1:4,4),MomExt(1:4,6),MomExt(1:4,3),-MomExt(1:4,1),-MomExt(1:4,2)/),yRnd(11:18),(/PreFacDip*PDFFac(1),PreFacDip*PDFFac(2)/),DipoleResult)
     ENDIF
     EvalCS_anomcoupl_Dips_ttbqqbgp = EvalCS_anomcoupl_Dips_ttbqqbgp + DipoleResult(1) + DipoleResult(2)
