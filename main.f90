@@ -1706,12 +1706,20 @@ ENDIF
 IF( MASTERPROCESS.EQ.19 ) THEN
 
 IF( CORRECTION.EQ.2 ) THEN
-  call vegas(EvalCS_Real_ttbgggZ,VG_Result,VG_Error,VG_Chi2)
+   if (Process .ge. 71 .and. Process .le. 79) then   
+      call vegas(EvalCS_Real_ttbgggZ,VG_Result,VG_Error,VG_Chi2)
+   elseif (Process .ge. 81 .and. Process .le. 89) then
+      call vegas(EvalCS_anomcoupl_Real_ttbgggp,VG_Result,VG_Error,VG_Chi2)
+   endif
   if( warmup ) then
    itmx = VegasIt1
    ncall= VegasNc1
    call InitHisto()
-   call vegas1(EvalCS_Real_ttbgggZ,VG_Result,VG_Error,VG_Chi2)
+   if (Process .ge. 71 .and. Process .le. 79) then
+      call vegas1(EvalCS_Real_ttbgggZ,VG_Result,VG_Error,VG_Chi2)
+   elseif (Process .ge. 81 .and. Process .le. 89) then
+      call vegas(EvalCS_anomcoupl_Real_ttbgggp,VG_Result,VG_Error,VG_Chi2)
+   endif
   endif
 ENDIF
 ENDIF
@@ -1721,12 +1729,20 @@ ENDIF
 
 IF( MASTERPROCESS.EQ.20 ) THEN
 IF( CORRECTION.EQ.2 ) THEN
-  call vegas(EvalCS_Real_ttbqqbgZ,VG_Result,VG_Error,VG_Chi2)
+   if (Process .ge. 71 .and. Process .le. 79) then   
+      call vegas(EvalCS_Real_ttbqqbgZ,VG_Result,VG_Error,VG_Chi2)
+   elseif (Process .ge. 81 .and. Process .le. 89) then
+      call vegas(EvalCS_anomcoupl_Real_ttbqqbgp,VG_Result,VG_Error,VG_Chi2)
+   endif
   if( warmup ) then
    itmx = VegasIt1
    ncall= VegasNc1
    call InitHisto()
-   call vegas1(EvalCS_Real_ttbqqbgZ,VG_Result,VG_Error,VG_Chi2)
+   if (Process .ge. 71 .and. Process .le. 79) then   
+      call vegas1(EvalCS_Real_ttbqqbgZ,VG_Result,VG_Error,VG_Chi2)
+   elseif (Process .ge. 81 .and. Process .le. 89) then
+      call vegas(EvalCS_anomcoupl_Real_ttbqqbgp,VG_Result,VG_Error,VG_Chi2)
+   endif
   endif
 ENDIF
 ENDIF
