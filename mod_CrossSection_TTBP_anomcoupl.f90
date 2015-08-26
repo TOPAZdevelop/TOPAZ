@@ -133,11 +133,11 @@ ENDIF
    couplZTT_left_dyn=Q_top
    couplZTT_right_dyn=Q_top
 
-   print *, "MomExt(1:4,1)= (/",MomExt(1:4,1),"/)"
-   print *, "MomExt(1:4,2)= (/",MomExt(1:4,2),"/)"
-   print *, "MomExt(1:4,3)= (/",MomExt(1:4,3),"/)"
-   print *, "MomExt(1:4,4)= (/",MomExt(1:4,4),"/)"
-   print *, "MomExt(1:4,5)= (/",MomExt(1:4,5),"/)"
+!   print *, "MomExt(1:4,1)= (/",MomExt(1:4,1),"/)"
+!   print *, "MomExt(1:4,2)= (/",MomExt(1:4,2),"/)"
+!   print *, "MomExt(1:4,3)= (/",MomExt(1:4,3),"/)"
+!   print *, "MomExt(1:4,4)= (/",MomExt(1:4,4),"/)"
+!   print *, "MomExt(1:4,5)= (/",MomExt(1:4,5),"/)"
    
 
 !------------ LO --------------
@@ -504,8 +504,8 @@ ELSEIF( Correction.EQ.1 ) THEN
 
 IF( Correction.EQ.0 ) THEN
 !  normalization
-print *, "LO Res UnPol",LO_Res_UnPol
-stop
+!print *, "LO Res UnPol",LO_Res_UnPol
+!stop
 
    LO_Res_Unpol = LO_Res_Unpol * ISFac * (alpha_s4Pi*RunFactor)**2 *alpha4Pi* WidthExpansion
    EvalCS_anomcoupl_1L_ttbggp = LO_Res_Unpol * PreFac
@@ -776,8 +776,8 @@ IF( CORRECTION.EQ.0 ) THEN
         LO_Res_UnPol = LO_Res_UnPol + LO_Res_Pol
     enddo!helicity loop
  enddo! npdf loop
-  print *, "LO_Res_UnPol", LO_Res_UnPol
-  stop
+!  print *, "LO_Res_UnPol", LO_Res_UnPol
+!  stop
   call swapMom(MomExt(1:4,1),MomExt(1:4,2))   ! swap back to original order, for ID below
 ! print *, "mom swap deactivated"
 
@@ -1054,19 +1054,19 @@ enddo! npdf loop
 ! print *, "mom swap deactivated"
 ENDIF
 
-print *, "LO Res UnPol",LO_Res_UnPol
-print *, "Gamma5 renorm/LO",Ren_Res_UnPol/LO_Res_UnPol
-print *,"renorm/LO", HOO_Ren_Res_UnPol/LO_Res_UnPol
-print *, "(Bosonic loops)/LO, DP",NLO_Res_UnPol(-2)/LO_Res_UnPol
-print *, "(Bosonic loops)/LO, SP",NLO_Res_UnPol(-1)/LO_Res_UnPol
-print *, "(Bosonic loops)/LO, fin",(NLO_Res_UnPol(0)+NLO_Res_UnPol(1))/LO_Res_UnPol
-print *, "(fermionic loops)/LO, DP",NLO_Res_UnPol_Ferm(-2)/LO_Res_UnPol
-print *, "(fermionic loops)/LO, SP",NLO_Res_UnPol_Ferm(-1)/LO_Res_UnPol
-print *, "(fermionic loops)/LO, fin",(NLO_Res_UnPol_Ferm(0)+NLO_Res_UnPol_Ferm(1))/LO_Res_UnPol
-print *, "(Bosonic+fermionic loops)/LO, DP", (NLO_Res_UnPol(-2)+NLO_Res_UnPol_Ferm(-2))/LO_Res_UnPol
-print *, "(Bosonic+fermionic loops)/LO, SP", (NLO_Res_UnPol(-1)+NLO_Res_UnPol_Ferm(-1))/LO_Res_UnPol
-print *, "(Bosonic+fermionic loops)/LO, fin",(NLO_Res_UnPol(0)+NLO_Res_UnPol(1)+NLO_Res_UnPol_Ferm(0)+NLO_Res_UnPol_Ferm(1))/LO_Res_UnPol
-stop
+!print *, "LO Res UnPol",LO_Res_UnPol
+!print *, "Gamma5 renorm/LO",Ren_Res_UnPol/LO_Res_UnPol
+!print *,"renorm/LO", HOO_Ren_Res_UnPol/LO_Res_UnPol
+!print *, "(Bosonic loops)/LO, DP",NLO_Res_UnPol(-2)/LO_Res_UnPol
+!print *, "(Bosonic loops)/LO, SP",NLO_Res_UnPol(-1)/LO_Res_UnPol
+!print *, "(Bosonic loops)/LO, fin",(NLO_Res_UnPol(0)+NLO_Res_UnPol(1))/LO_Res_UnPol
+!print *, "(fermionic loops)/LO, DP",NLO_Res_UnPol_Ferm(-2)/LO_Res_UnPol
+!print *, "(fermionic loops)/LO, SP",NLO_Res_UnPol_Ferm(-1)/LO_Res_UnPol
+!print *, "(fermionic loops)/LO, fin",(NLO_Res_UnPol_Ferm(0)+NLO_Res_UnPol_Ferm(1))/LO_Res_UnPol
+!print *, "(Bosonic+fermionic loops)/LO, DP", (NLO_Res_UnPol(-2)+NLO_Res_UnPol_Ferm(-2))/LO_Res_UnPol
+!print *, "(Bosonic+fermionic loops)/LO, SP", (NLO_Res_UnPol(-1)+NLO_Res_UnPol_Ferm(-1))/LO_Res_UnPol
+!print *, "(Bosonic+fermionic loops)/LO, fin",(NLO_Res_UnPol(0)+NLO_Res_UnPol(1)+NLO_Res_UnPol_Ferm(0)+NLO_Res_UnPol_Ferm(1))/LO_Res_UnPol
+!stop
 
 
 IF( CORRECTION.EQ.0 ) THEN
@@ -1270,14 +1270,6 @@ include "vegas_common.f"
    call EvalPhaseSpace_2to4(EHat,yRnd(3:10),MomExt(1:4,1:6),PSWgt)
    call boost2Lab(eta1,eta2,6,MomExt(1:4,1:6))
    ISFac = MomCrossing(MomExt(1:4,1:6))
-   print *, "NDim",NDim
-   print *,"p1",MomExt(1:4,1)
-   print *,"p2",MomExt(1:4,2)
-   print *,"p3",MomExt(1:4,3)
-   print *,"p4",MomExt(1:4,4)
-   print *,"p5",MomExt(1:4,5)
-   print *,"p6",MomExt(1:4,6)
-
 
    PSWgt2 = 1d0
    PSWgt3 = 1d0
@@ -1288,13 +1280,6 @@ IF( TopDecays.GE.1 ) THEN
    call TopDecay(ExtParticle(1),DK_LO,MomExt(1:4,7:9))
    call TopDecay(ExtParticle(2),DK_LO,MomExt(1:4,10:12))
 ENDIF
-
-   print *,"p7",MomExt(1:4,7)
-   print *,"p8",MomExt(1:4,8)
-   print *,"p9",MomExt(1:4,9)
-   print *,"p10",MomExt(1:4,10)
-   print *,"p11",MomExt(1:4,11)
-   print *,"p12",MomExt(1:4,12)
 
 
    call CheckSing(MomExt,applySingCut)
