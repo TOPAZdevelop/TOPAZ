@@ -628,7 +628,7 @@ integer TheUnit
    write(TheUnit,'(A,F8.3)') "# pT_bjet_cut= ",pT_bjet_cut*100d0
    write(TheUnit,'(A,F8.3)') "# eta_bjet_cut= ",eta_bjet_cut
    write(TheUnit,'(A,F8.3)') "# Rsep_jet= ",Rsep_jet
-   write(TheUnit,'(A,F8.3)') "# Rsep_jetlep= ",Rsep_jetlep
+   write(TheUnit,'(A,F8.3)') "# Rsep_lepjet= ",Rsep_lepjet
    write(TheUnit,'(A,F8.3)') "# Rsep_leplep= ",Rsep_leplep
    write(TheUnit,'(A,F8.3)') "# pT_lep_cut= ",pT_lep_cut*100d0
    write(TheUnit,'(A,F8.3)') "# eta_lep_cut= ",eta_lep_cut
