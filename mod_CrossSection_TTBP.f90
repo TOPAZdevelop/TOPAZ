@@ -3574,6 +3574,15 @@ END FUNCTION
 
 
 
+FUNCTION EvalCS_DKP_1L_ttbgg_MPI(yRnd,VgsWgt,res)
+implicit none
+integer :: EvalCS_DKP_1L_ttbgg_MPI
+real(8) ::  yRnd(*),res(*),VgsWgt
+
+res(1) = EvalCS_DKP_1L_ttbgg(yRnd,VgsWgt)
+EvalCS_DKP_1L_ttbgg_MPI=0
+RETURN
+END FUNCTION
 
 
 
@@ -4058,6 +4067,15 @@ END FUNCTION
 
 
 
+FUNCTION EvalCS_DKP_1L_ttbqqb_MPI(yRnd,VgsWgt,res)
+implicit none
+integer :: EvalCS_DKP_1L_ttbqqb_MPI
+real(8) ::  yRnd(*),res(*),VgsWgt
+
+res(1) = EvalCS_DKP_1L_ttbqqb(yRnd,VgsWgt)
+EvalCS_DKP_1L_ttbqqb_MPI=0
+RETURN
+END FUNCTION
 
 
 FUNCTION EvalCS_DKP_1L_ttbqqb(yRnd,VgsWgt)
