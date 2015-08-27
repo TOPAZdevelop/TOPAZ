@@ -624,6 +624,17 @@ END FUNCTION
 
 
 
+FUNCTION EvalCS_anomcoupl_1L_ttbqqbp_MPI(yRnd,VgsWgt,res)
+implicit none
+integer :: EvalCS_anomcoupl_1L_ttbqqbp_MPI
+real(8) ::  yRnd(*),res(*),VgsWgt
+
+res(1) = EvalCS_anomcoupl_1L_ttbqqbp(yRnd,VgsWgt)
+EvalCS_anomcoupl_1L_ttbqqbp_MPI=0
+RETURN
+END FUNCTION
+
+
 
 
 

@@ -2395,14 +2395,23 @@ IF( MASTERPROCESS.EQ.17 ) THEN
 IF( CORRECTION.EQ.0 .OR. CORRECTION.EQ.3 ) THEN
   init=0
   call ClearRedHisto()
-  call vegas_mpi(yrange(1:2*ndim),ndim,EvalCS_1L_ttbggZ_MPI,init,ncall,itmx,nprn,NUMFUNCTIONS,PDIM,WORKERS,VG_Result,VG_Error,VG_Chi2)
+  if (Process .ge. 71 .and. Process .le. 79) then
+     call vegas_mpi(yrange(1:2*ndim),ndim,EvalCS_1L_ttbggZ_MPI,init,ncall,itmx,nprn,NUMFUNCTIONS,PDIM,WORKERS,VG_Result,VG_Error,VG_Chi2)
+  elseif (Process .ge. 81 .and. Process .le. 89) then
+     call vegas_mpi(yrange(1:2*ndim),ndim,EvalCS_anomcoupl_1L_ttbgg_MPI,init,ncall,itmx,nprn,NUMFUNCTIONS,PDIM,WORKERS,VG_Result,VG_Error,VG_Chi2)
+  endif
+     
   if( warmup ) then
     init=1
     itmx = VegasIt1
     ncall= VegasNc1
     call InitHisto()
     call ClearRedHisto()
-    call vegas_mpi(yrange(1:2*ndim),ndim,EvalCS_1L_ttbggZ_MPI,init,ncall,itmx,nprn,NUMFUNCTIONS,PDIM,WORKERS,VG_Result,VG_Error,VG_Chi2)
+    if (Process .ge. 71 .and. Process .le. 79) then
+       call vegas_mpi(yrange(1:2*ndim),ndim,EvalCS_1L_ttbggZ_MPI,init,ncall,itmx,nprn,NUMFUNCTIONS,PDIM,WORKERS,VG_Result,VG_Error,VG_Chi2)
+  elseif (Process .ge. 81 .and. Process .le. 89) then
+     call vegas_mpi(yrange(1:2*ndim),ndim,EvalCS_anomcoupl_1L_ttbgg_MPI,init,ncall,itmx,nprn,NUMFUNCTIONS,PDIM,WORKERS,VG_Result,VG_Error,VG_Chi2)
+  endif
   endif
 
 
@@ -2479,14 +2488,23 @@ IF( MASTERPROCESS.EQ.18 ) THEN
 IF( CORRECTION.EQ.0 .OR. CORRECTION.EQ.3 ) THEN
   init=0
   call ClearRedHisto()
-  call vegas_mpi(yrange(1:2*ndim),ndim,EvalCS_1L_ttbqqbZ_MPI,init,ncall,itmx,nprn,NUMFUNCTIONS,PDIM,WORKERS,VG_Result,VG_Error,VG_Chi2)
+  if (Process .ge. 71 .and. Process .le. 79) then
+     call vegas_mpi(yrange(1:2*ndim),ndim,EvalCS_1L_ttbqqbZ_MPI,init,ncall,itmx,nprn,NUMFUNCTIONS,PDIM,WORKERS,VG_Result,VG_Error,VG_Chi2)
+  elseif (Process .ge. 81 .and. Process .le. 89) then
+     call vegas_mpi(yrange(1:2*ndim),ndim,EvalCS_anomcoupl_1L_ttbqqbp_MPI,init,ncall,itmx,nprn,NUMFUNCTIONS,PDIM,WORKERS,VG_Result,VG_Error,VG_Chi2)
+  endif
+     
   if( warmup ) then
     init=1
     itmx = VegasIt1
     ncall= VegasNc1
     call InitHisto()
     call ClearRedHisto()
-    call vegas_mpi(yrange(1:2*ndim),ndim,EvalCS_1L_ttbqqbZ_MPI,init,ncall,itmx,nprn,NUMFUNCTIONS,PDIM,WORKERS,VG_Result,VG_Error,VG_Chi2)
+    if (Process .ge. 71 .and. Process .le. 79) then
+       call vegas_mpi(yrange(1:2*ndim),ndim,EvalCS_1L_ttbqqbZ_MPI,init,ncall,itmx,nprn,NUMFUNCTIONS,PDIM,WORKERS,VG_Result,VG_Error,VG_Chi2)
+    elseif (Process .ge. 81 .and. Process .le. 89) then
+       call vegas_mpi(yrange(1:2*ndim),ndim,EvalCS_anomcoupl_1L_ttbqqbp_MPI,init,ncall,itmx,nprn,NUMFUNCTIONS,PDIM,WORKERS,VG_Result,VG_Error,VG_Chi2)
+    endif
   endif
 
 ELSEIF( CORRECTION   .EQ.1 ) THEN
