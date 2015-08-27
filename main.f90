@@ -2398,7 +2398,7 @@ IF( CORRECTION.EQ.0 .OR. CORRECTION.EQ.3 ) THEN
   if (Process .ge. 71 .and. Process .le. 79) then
      call vegas_mpi(yrange(1:2*ndim),ndim,EvalCS_1L_ttbggZ_MPI,init,ncall,itmx,nprn,NUMFUNCTIONS,PDIM,WORKERS,VG_Result,VG_Error,VG_Chi2)
   elseif (Process .ge. 81 .and. Process .le. 89) then
-     call vegas_mpi(yrange(1:2*ndim),ndim,EvalCS_anomcoupl_1L_ttbgg_MPI,init,ncall,itmx,nprn,NUMFUNCTIONS,PDIM,WORKERS,VG_Result,VG_Error,VG_Chi2)
+     call vegas_mpi(yrange(1:2*ndim),ndim,EvalCS_anomcoupl_1L_ttbggp_MPI,init,ncall,itmx,nprn,NUMFUNCTIONS,PDIM,WORKERS,VG_Result,VG_Error,VG_Chi2)
   endif
      
   if( warmup ) then
@@ -2410,7 +2410,7 @@ IF( CORRECTION.EQ.0 .OR. CORRECTION.EQ.3 ) THEN
     if (Process .ge. 71 .and. Process .le. 79) then
        call vegas_mpi(yrange(1:2*ndim),ndim,EvalCS_1L_ttbggZ_MPI,init,ncall,itmx,nprn,NUMFUNCTIONS,PDIM,WORKERS,VG_Result,VG_Error,VG_Chi2)
   elseif (Process .ge. 81 .and. Process .le. 89) then
-     call vegas_mpi(yrange(1:2*ndim),ndim,EvalCS_anomcoupl_1L_ttbgg_MPI,init,ncall,itmx,nprn,NUMFUNCTIONS,PDIM,WORKERS,VG_Result,VG_Error,VG_Chi2)
+     call vegas_mpi(yrange(1:2*ndim),ndim,EvalCS_anomcoupl_1L_ttbggp_MPI,init,ncall,itmx,nprn,NUMFUNCTIONS,PDIM,WORKERS,VG_Result,VG_Error,VG_Chi2)
   endif
   endif
 
