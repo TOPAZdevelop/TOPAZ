@@ -2292,7 +2292,7 @@ ELSEIF( CORRECTION.LE.1 .AND. PROCESS.EQ.21 ) THEN
     call InitHisto()
     call ClearRedHisto()
     call vegas_mpi(yrange(1:2*ndim),ndim,EvalCS_DKP_1L_ttbgg_MPI,init,ncall,itmx,nprn,NUMFUNCTIONS,PDIM,WORKERS,VG_Result,VG_Error,VG_Chi2)
-
+ endif
 ELSEIF( CORRECTION.EQ.3 .AND. PROCESS.LE.5 ) THEN
   init=0
   call ClearRedHisto()
@@ -2325,7 +2325,7 @@ IF( CORRECTION.LE.1 .AND. PROCESS.EQ.2 .AND. TOPDECAYS.NE.101) THEN
   endif
 
 
-ELSEIF( CORRECTION.LE.1 .AND. PROCESS.EQ.21 ) THEN
+ELSEIF( CORRECTION.LE.1 .AND. PROCESS.EQ.23 ) THEN
   init=0
   call ClearRedHisto()
   call vegas_mpi(yrange(1:2*ndim),ndim,EvalCS_DKP_1L_ttbqqb_MPI,init,ncall,itmx,nprn,NUMFUNCTIONS,PDIM,WORKERS,VG_Result,VG_Error,VG_Chi2)
@@ -2336,7 +2336,7 @@ ELSEIF( CORRECTION.LE.1 .AND. PROCESS.EQ.21 ) THEN
     call InitHisto()
     call ClearRedHisto()
     call vegas_mpi(yrange(1:2*ndim),ndim,EvalCS_DKP_1L_ttbqqb_MPI,init,ncall,itmx,nprn,NUMFUNCTIONS,PDIM,WORKERS,VG_Result,VG_Error,VG_Chi2)
-
+ endif
 ELSEIF( CORRECTION.EQ.3 .AND. PROCESS.LE.6 ) THEN
   init=0
   call ClearRedHisto()
