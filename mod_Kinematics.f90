@@ -44,7 +44,7 @@ type(HistogramMultiDim),allocatable       :: Histo3D(:),Histo2D(:)
 
 
 real(8) :: pT_jet_cut, pT_bjet_cut, pT_lep_cut, Rsep_jet, Rsep_LepJet, pT_miss_cut, eta_sepa_cut, MInv_jets_cut, eta_lep_cut, eta_jet_cut, eta_bjet_cut, HT_cut, pT_hardestjet_cut
-real(8) :: pT_pho_cut,Rsep_Pj,Rsep_Pbj,Rsep_Plep,eta_pho_cut,MTW_cut, Mttbar_cut,Rsep_jetlep,Rsep_leplep
+real(8) :: pT_pho_cut,Rsep_Pj,Rsep_Pbj,Rsep_Plep,eta_pho_cut,MTW_cut, Mttbar_cut,Rsep_jetlep,Rsep_leplep,pT_pho_max
 real(8) :: pT_lepZ_cut,pt_lept_cut,pT_ll_cut,HT_jet_cut,Frac_sep_jetlep,MZ_window,HTMTW_cut
 
 real(8),public :: MInv_LB, MInv_T2
@@ -481,6 +481,7 @@ ELSEIF (ObsSet .eq. 30) THEN
 ! this is for the ttb+gamma anom. coupl. analysis -- inspired by ATLAS analysis, hep-ex:1502.00586
 ! hadr. atop, lept. top decay. Final state: b bbar j j mu- MET
    pT_pho_cut  = 20d0*GeV
+   pT_pho_max  = 300d0*GeV
    eta_pho_cut = 2.37d0
 
    pT_lep_cut  = 20d0*GeV
@@ -3329,7 +3330,7 @@ ELSEIF( ObsSet.EQ.29 ) THEN! set of observables for ttbgamma production without 
 
           Histo(5)%Info   = "pT_Photon"
           Histo(5)%NBins  = 50
-          Histo(5)%BinSize= 20d0*GeV
+          Histo(5)%BinSize= 10d0*GeV
           Histo(5)%LowVal = 0d0*GeV
           Histo(5)%SetScale= 100d0
 
@@ -3460,8 +3461,8 @@ ELSEIF( ObsSet.EQ.29 ) THEN! set of observables for ttbgamma production without 
           Histo(26)%SetScale= 1d0
 
           Histo(27)%Info   = "m(lep+bjet)"
-          Histo(27)%NBins  = 90
-          Histo(27)%BinSize= 5d0*GeV
+          Histo(27)%NBins  = 50
+          Histo(27)%BinSize= 10d0*GeV
           Histo(27)%LowVal = 20d0*GeV
           Histo(27)%SetScale= 100d0
 
@@ -9521,7 +9522,7 @@ elseif( ObsSet.eq.29) then! ttb+photon production without top decays at Tevatron
     if( Phi_LP.gt.Pi ) Phi_LP=2d0*Pi-Phi_LP
 
 ! check cuts
-    if(pt_Pho.lt.pT_pho_cut) then
+    if(pt_Pho.lt.pT_pho_cut .or. pt_Pho .gt. pT_pho_max) then
 !       print *,"photon pt cut"
         applyPSCut = .true.
         RETURN

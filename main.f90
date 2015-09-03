@@ -636,6 +636,7 @@ integer TheUnit
    write(TheUnit,'(A,F8.3)') "# MInv_jets_cut= ",MInv_jets_cut*100d0
    write(TheUnit,'(A,F8.3)') "# HT_cut= ",HT_cut*100d0
    write(TheUnit,'(A,F8.3)') "# pt_photon_cut= ",pt_pho_cut*100d0
+   write(TheUnit,'(A,F8.3)') "# pt_photon_max= ",pt_pho_max*100d0
    write(TheUnit,'(A,F8.3)') "# eta_photon_cut= ",eta_pho_cut
    write(TheUnit,'(A,F8.3)') "# Rsep_photonjet= ",Rsep_Pj
    write(TheUnit,'(A,F8.3)') "# Rsep_photonbjet= ",Rsep_Pbj
