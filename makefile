@@ -275,7 +275,25 @@ DipoleObjTTBH = $(ObjectDir)/mod_Dipoles_GGTTBGH.o \
                 $(ObjectDir)/mod_IntDipoles_QGTTBQH.o \
                 $(ObjectDir)/mod_IntDipoles_QBGTTBQBH.o
 
+DipoleDepTTBP_anom = $(Here)/dipoles/mod_Dipoles_GGTTBGP_anom.f90 \
+            $(Here)/dipoles/mod_Dipoles_QQBTTBGP_anom.f90 \
+            $(Here)/dipoles/mod_Dipoles_QGTTBQP_anom.f90 \
+            $(Here)/dipoles/mod_Dipoles_QBGTTBQBP_anom.f90 \
+            $(Here)/dipoles/mod_IntDipoles_GGTTBGP_anom.f90 \
+            $(Here)/dipoles/mod_IntDipoles_QQBTTBGP_anom.f90 \
+            $(Here)/dipoles/mod_IntDipoles_QGTTBQP_anom.f90 \
+            $(Here)/dipoles/mod_IntDipoles_QBGTTBQBP_anom.f90
 
+DipoleObjTTBP_anom = $(ObjectDir)/mod_Dipoles_GGTTBGP_anom.o \
+                $(ObjectDir)/mod_Dipoles_QQBTTBGP_anom.o \
+                $(ObjectDir)/mod_Dipoles_QGTTBQP_anom.o \
+                $(ObjectDir)/mod_Dipoles_QBGTTBQBP_anom.o \
+                $(ObjectDir)/mod_IntDipoles_GGTTBGP_anom.o \
+                $(ObjectDir)/mod_IntDipoles_QQBTTBGP_anom.o \
+                $(ObjectDir)/mod_IntDipoles_QGTTBQP_anom.o \
+                $(ObjectDir)/mod_IntDipoles_QBGTTBQBP_anom.o
+
+                
 DipoleDepSTSTB = $(Here)/dipoles/mod_Dipoles_GGSTSTBG.f90 \
 		 $(Here)/dipoles/mod_IntDipoles_GGSTSTBG.f90 \
 		 $(Here)/dipoles/mod_Dipoles_QQBSTSTBG.f90  \
@@ -463,6 +481,7 @@ allObjects =   				$(ObjectDir)/mod_Misc.o \
 					$(DipoleObjTTBP) \
 					$(DipoleObjTTBZ) \
 					$(DipoleObjTTBH) \
+					$(DipoleObjTTBP_anom) \
 					$(DipoleObjSTSTB) \
 					$(DipoleObjHTHTB) \
 					$(DipoleObjZprime) \
