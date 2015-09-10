@@ -155,6 +155,7 @@ eta_bjet_cut      = 1d100
 HT_cut            = 1d100
 pT_hardestjet_cut = 1d100
 pT_pho_cut        = 1d100
+pT_pho_max        = 1d100
 Rsep_Pj           = 1d100
 Rsep_Pbj          = 1d100
 Rsep_Plep         = 1d100
@@ -308,6 +309,7 @@ ELSEIF( ObsSet.EQ.20 ) THEN! set of observables for ttbgamma production without 
 ELSEIF( ObsSet.EQ.21 ) THEN! set of observables for ttbgamma production without decays at LHC
 !     Rsep_jet    = 1d0
     pT_pho_cut  = 20d0*GeV
+   
     Rsep_Pj      = 0.4d0
 !     Rsep_Plep    = 0.4d0
 
@@ -7346,7 +7348,7 @@ real(8),parameter :: NPr=4, PiWgtPr = (2d0*Pi)**(4-NPr*3) * (4d0*Pi)**(NPr-1)
 
 !    Pcol1= 1 -1
 !    Pcol2= 3 -1
-!    SingDepth = 1d-16
+!    SingDepth = 1d-10
 !    Steps = 20
 !    PSWgt = 1d0
 !    call gensing(4,EHat,Masses(1:4),Mom(1:4,3:6),Pcol1,Pcol2,SingDepth,Steps); print *, "gensing"
@@ -7463,12 +7465,13 @@ real(8),parameter :: NPr=4, PiWgtPr = (2d0*Pi)**(4-NPr*3) * (4d0*Pi)**(NPr-1)
 ! Mom(1:4,5)=MomTmp(1:4,3)
 ! Mom(1:4,6)=MomTmp(1:4,4)
 
-!    Pcol1= 1 -1
+!    Pcol1= 3 -1
 !    Pcol2= 3 -1
 !    SingDepth = 1d-10
-!    Steps = 10
+!    Steps = 20
 !    PSWgt = 1d0
 !    call gensing(4,EHat,(/0d0,0d0,m_Top,m_Top/),Mom(1:4,3:6),Pcol1,Pcol2,SingDepth,Steps)
+!    print *, "fixing singular momenta for ",Pcol1+1,"-",Pcol2+1," with singdepth=",singdepth,"and steps=",steps
 
 !  particles on the beam axis:
    Mom(1,1) =  EHat*0.5d0
@@ -8732,11 +8735,13 @@ END SUBROUTINE
 
 
 
-SUBROUTINE Kinematics_TTBARPHOTON(NPlus1PS,Mom,MomOrder,applyPSCut,NBin)
+SUBROUTINE Kinematics_TTBARPHOTON(NPlus1PS,Mom,MomOrder,applyPSCut,NBin,PObs)
+! RR: Obs only implemented for ObsSet=30
 use ModMisc
 use ModParameters
 implicit none
 integer :: NumHadr,NPlus1PS,MomOrder(1:12)
+real(8),optional :: PObs(:)
 real(8) :: Mom(1:4,1:12),zeros(1:12)
 real(8) :: MomJet(1:4,1:7),MomJet_CHECK(1:4,1:7)
 real(8) :: MomHadr(1:4,0:8)
@@ -9601,8 +9606,37 @@ elseif( ObsSet.eq.29) then! ttb+photon production without top decays at Tevatron
     NBin(28) = WhichBin(28,m_leppho)  
     NBin(29) = WhichBin(29,Phi_LP)  
     
-
-
+    if( present(PObs) ) then
+       PObs(1) = pT_ATop
+       PObs(2) = eta_ATop
+       PObs(3) = pT_Top
+       PObs(4) = eta_Top
+       PObs(5) = pT_Pho
+       PObs(6) = eta_Pho    
+       PObs(7) = pT_lepM
+       PObs(8) = eta_lepM
+       PObs(9) = ET_miss    
+       PObs(10) = HT  
+       PObs(11) = pT_jet(1) 
+       PObs(12) = pT_jet(2) 
+       PObs(13) = pT_jet(3) 
+       PObs(14) = pT_jet(4) 
+       PObs(15) = pT_jet(5)
+       PObs(16) = R_Pj(1) 
+       PObs(17) = R_Pj(2) 
+       PObs(18) = R_Pj(3) 
+       PObs(19) = R_Pj(4) 
+       PObs(20) = R_Pj(5) 
+       PObs(21) = R_lj(1) 
+       PObs(22) = R_lj(2) 
+       PObs(23) = R_lj(3) 
+       PObs(24) = R_lj(4) 
+       PObs(25) = R_lj(5) 
+       PObs(26) = R_PlepM 
+       PObs(27) = m_lb  
+       PObs(28) = m_leppho  
+       PObs(29) = Phi_LP 
+    endif
 
 !-------------------------------------------------------
 else
