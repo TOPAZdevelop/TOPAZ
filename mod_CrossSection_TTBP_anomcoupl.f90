@@ -59,7 +59,7 @@ real(8) :: MadGraph_tree
 real(8),parameter :: Nc=3d0,Cf=4d0/3d0
 real(8) :: eta1,eta2,sHatJacobi,PreFac,FluxFac,PDFFac,AccPoles
 real(8) :: pdf(-6:6,1:2),pdf_z(-6:6,1:2),xE,HOp(1:3)
-real(8) :: QPtol,DPtol
+real(8) :: QPtol,DPtol,PObs(1:NumMaxHisto)
 integer :: NBin(1:NumMaxHisto),NHisto,PhotonCouplCorr=2d0,nHel(1:2),NRndHel
 real(8) :: Ren_Res_Pol,Ren_Res_UnPol,HOO_Ren_Res_Pol,HOO_Ren_Res_UnPol,LightLoopCoupl
 complex(8) :: tmpBornResults(14),FullBornAmps(1:NumPrimAmps),RenormAmps(1:NumPrimAmps),HOO_RenormAmps(1:NumPrimAmps),HOO_RenormPartAmp(1:3)
@@ -106,7 +106,7 @@ IF( TOPDECAYS.NE.0 ) THEN
    NRndHel=16
 ENDIF
 
-   call Kinematics_TTBARPHOTON(0,MomExt(1:4,1:12),(/4,5,3,1,2,0,6,7,8,9,10,11/),applyPSCut,NBin)
+   call Kinematics_TTBARPHOTON(0,MomExt(1:4,1:12),(/4,5,3,1,2,0,6,7,8,9,10,11/),applyPSCut,NBin,PObs)
    if( applyPSCut ) then
       EvalCS_anomcoupl_1L_ttbggp = 0d0
       return
@@ -612,7 +612,7 @@ ENDIF
 
 
    do NHisto=1,NumHistograms
-      call intoHisto(NHisto,NBin(NHisto),EvalCS_anomcoupl_1L_ttbggp)
+      call intoHisto(NHisto,NBin(NHisto),EvalCS_anomcoupl_1L_ttbggp,BinValue=PObs(NHisto))
    enddo
 
 
@@ -709,7 +709,7 @@ IF( TOPDECAYS.NE.0 ) THEN
    NRndHel=16
 ENDIF
 
-   call Kinematics_TTBARPHOTON(0,MomExt(1:4,1:12),(/4,5,3,1,2,0,6,7,8,9,10,11/),applyPSCut,NBin)
+   call Kinematics_TTBARPHOTON(0,MomExt(1:4,1:12),(/4,5,3,1,2,0,6,7,8,9,10,11/),applyPSCut,NBin,PObs)
    if( applyPSCut ) then
       EvalCS_anomcoupl_1L_ttbqqbp = 0d0
       return
@@ -1231,7 +1231,7 @@ ENDIF
 
 
    do NHisto=1,NumHistograms
-      call intoHisto(NHisto,NBin(NHisto),EvalCS_anomcoupl_1L_ttbqqbp)
+      call intoHisto(NHisto,NBin(NHisto),EvalCS_anomcoupl_1L_ttbqqbp,BinValue=PObs(NHisto))
    enddo
 
 
@@ -1254,7 +1254,7 @@ use ModKinematics
 use ModAmplitudes
 use ModMisc
 use ModProcess
-use ModDipoles_GGTTBGP
+use ModDipoles_GGTTBGP_anom
 implicit none
 real(8) ::  EvalCS_anomcoupl_Real_ttbgggp,yRnd(1:VegasMxDim),VgsWgt,DipoleResult
 complex(8) :: LO_Res_Pol,LO_Res_Unpol,PartAmp(1:4)
@@ -1262,11 +1262,25 @@ integer :: iHel,jPrimAmp,iPrimAmp,NHisto,NBin(1:NumMaxHisto)
 real(8) :: EHat,PSWgt,PSWgt2,PSWgt3,ISFac,RunFactor,PreFac,sij
 real(8) :: eta1,eta2,sHatJacobi,FluxFac,PDFFac
 real(8) :: MomExt(1:4,1:12),pdf(-6:6,1:2)
-real(8) :: MG_MOM(0:3,1:6)
+real(8) :: MG_MOM(0:3,1:6),PObs(1:NumMaxHisto)
 real(8) :: MadGraph_tree
 logical :: applyPSCut,applySingCut
 real(8),parameter :: PhotonCouplCorr=2d0
 include "vegas_common.f"
+
+
+! yRnd( 1)=  0.3385585941088194d0
+! yRnd( 2)=  0.2799513116385563d0
+! yRnd( 3)=  0.012473622342792d0
+! yRnd( 4)=  0.2879364093709448d0
+! yRnd( 5)=  0.1334328211068331d0
+! yRnd( 6)=  0.7829718273519412d0
+! yRnd( 7)=  0.3479862101366653d0
+! yRnd( 8)=  0.1332233664734401d0
+! yRnd( 9)=  0.2332185946559626d0
+! yRnd(10)=  0.7471774192280964d0
+! print *, "fixing yrnds"
+! print *, yRnd
 
 
   EvalCS_anomcoupl_Real_ttbgggp= 0d0
@@ -1295,10 +1309,13 @@ ENDIF
 
    call CheckSing(MomExt,applySingCut)
    if( applySingCut ) then
+!      print *, "Applying singularity cut"
+!      stop
        EvalCS_anomcoupl_Real_ttbgggp = 0d0
        return
    endif
-   call Kinematics_TTBARPHOTON(1,MomExt(1:4,1:12),(/5,6,4,1,2,3,7,8,9,10,11,12/),applyPSCut,NBin)
+
+    call Kinematics_TTBARPHOTON(1,MomExt(1:4,1:12),(/5,6,4,1,2,3,7,8,9,10,11,12/),applyPSCut,NBin,POBs)
 
    call setPDFs(eta1,eta2,MuFac,pdf)
    PDFFac = pdf(0,1) * pdf(0,2)
@@ -1327,23 +1344,22 @@ ENDIF
         enddo!helicity loop
 
         LO_Res_Unpol = LO_Res_Unpol * ISFac * (alpha_s4Pi*RunFactor)**3 * alpha4Pi
-        print *, "gg->g ttb photon",LO_Res_UnPol
-  
-        stop
+!        pause
         EvalCS_anomcoupl_Real_ttbgggp = LO_Res_Unpol * PreFac
-
         do NHisto=1,NumHistograms
-               call intoHisto(NHisto,NBin(NHisto),EvalCS_anomcoupl_Real_ttbgggp)
+               call intoHisto(NHisto,NBin(NHisto),EvalCS_anomcoupl_Real_ttbgggp,BinValue=PObs(NHisto))
         enddo
 endif!applyPSCut
 
 
     PreFac = PreFac * ISFac * (alpha_s4Pi*RunFactor)**3 *alpha4Pi /PSWgt2/PSWgt3
-    call EvalDipoles_GGTTBGP((/MomExt(1:4,5),MomExt(1:4,4),MomExt(1:4,6),-MomExt(1:4,1),-MomExt(1:4,2),MomExt(1:4,3)/),yRnd(11:18),PreFac,DipoleResult)
+    call EvalDipoles_GGTTBGP_anom((/MomExt(1:4,5),MomExt(1:4,4),MomExt(1:4,6),-MomExt(1:4,1),-MomExt(1:4,2),MomExt(1:4,3)/),yRnd(11:18),PreFac,DipoleResult)
 
-!      sij = 2d0*(MomExt(1:4,1).dot.MomExt(1:4,3))
+!      sij = 2d0*(MomExt(1:4,2).dot.MomExt(1:4,3))
 !      sij = MomExt(1,3)**2
-!      print *,  sij/EHat**2,EvalCS_anomcoupl_Real_ttbgggp,DipoleResult,(1d0+EvalCS_anomcoupl_Real_ttbgggp/(DipoleResult))
+!      print *,  "sij",sij/EHat**2
+!      print *, "real,dipole",EvalCS_anomcoupl_Real_ttbgggp,DipoleResult
+!      print *, "rel. diff.",(1d0+EvalCS_anomcoupl_Real_ttbgggp/(DipoleResult))
 !      pause
 
 ! !      MADGRAPH CHECK: gg->tbtgp
@@ -1363,6 +1379,8 @@ endif!applyPSCut
 !        pause
 
     EvalCS_anomcoupl_Real_ttbgggp = (EvalCS_anomcoupl_Real_ttbgggp + DipoleResult)/VgsWgt
+!    EvalCounter=EvalCounter+1
+!    if (EvalCounter .gt. 15) stop
 RETURN
 END FUNCTION
 
@@ -1378,9 +1396,9 @@ use ModKinematics
 use ModAmplitudes
 use ModProcess
 use ModMisc
-use ModDipoles_QQBTTBGP
-use ModDipoles_QGTTBQP
-use ModDipoles_QBGTTBQBP
+use ModDipoles_QQBTTBGP_anom
+use ModDipoles_QGTTBQP_anom
+use ModDipoles_QBGTTBQBP_anom
 implicit none
 real(8) ::  EvalCS_anomcoupl_Real_ttbqqbgp,EvalCS_anomcoupl_Dips_ttbqqbgp,yRnd(1:VegasMxDim),VgsWgt,DipoleResult(1:2)
 complex(8) :: LO_Res_Pol,LO_Res_Unpol,PartAmp(1:4)
@@ -1388,12 +1406,19 @@ integer :: iHel,jPrimAmp,iPrimAmp,NHisto,NBin(1:NumMaxHisto),NPDF
 real(8) :: EHat,PSWgt,PSWgt2,PSWgt3,ISFac,RunFactor,PreFac,PreFacDip
 real(8) :: eta1,eta2,sHatJacobi,FluxFac,PDFFac(1:2),PDFFac_a(1:2),PDFFac_b(1:2)
 real(8) :: MomExt(1:4,1:12),sij,pdf(-6:6,1:2)
-real(8) :: MG_MOM(0:3,1:6)
+real(8) :: MG_MOM(0:3,1:6),PObs(1:NumMaxHisto)
 real(8) :: MadGraph_tree
 logical :: applyPSCut,applySingCut
 real(8),parameter :: PhotonCouplCorr=2d0
 integer,parameter :: up=1, dn=2
 include "vegas_common.f"
+
+
+ yrnd(1)=0.1d0
+ yrnd(2)=0.03d0
+ yrnd(3:10)=0.7d0
+ print *, "fixing yrnds"
+ print *, yRnd
 
 
 EvalCS_anomcoupl_Real_ttbqqbgp= 0d0
@@ -1410,6 +1435,8 @@ EvalCS_anomcoupl_Dips_ttbqqbgp= 0d0
    call boost2Lab(eta1,eta2,6,MomExt(1:4,1:6))
    call CheckSing(MomExt,applySingCut)
    if( applySingCut ) then
+      print *, "singular cut"
+      stop
        EvalCS_anomcoupl_Real_ttbqqbgp = 0d0
        return
    endif
@@ -1422,21 +1449,21 @@ EvalCS_anomcoupl_Dips_ttbqqbgp= 0d0
        PSWgt = PSWgt * PSWgt2*PSWgt3
    ENDIF
 
-   print *, "NDim",NDim
-   print *,"p1",MomExt(1:4,1)
-   print *,"p2",MomExt(1:4,2)
-   print *,"p3",MomExt(1:4,3)
-   print *,"p4",MomExt(1:4,4)
-   print *,"p5",MomExt(1:4,5)
-   print *,"p6",MomExt(1:4,6)
-   print *,"p7",MomExt(1:4,7)
-   print *,"p8",MomExt(1:4,8)
-   print *,"p9",MomExt(1:4,9)
-   print *,"p10",MomExt(1:4,10)
-   print *,"p11",MomExt(1:4,11)
-   print *,"p12",MomExt(1:4,12)
+!!   print *, "NDim",NDim
+!!   print *,"p1",MomExt(1:4,1)
+!!   print *,"p2",MomExt(1:4,2)
+!!   print *,"p3",MomExt(1:4,3)
+!!   print *,"p4",MomExt(1:4,4)
+!!   print *,"p5",MomExt(1:4,5)
+!!   print *,"p6",MomExt(1:4,6)
+!!   print *,"p7",MomExt(1:4,7)
+!!   print *,"p8",MomExt(1:4,8)
+!!   print *,"p9",MomExt(1:4,9)
+!!   print *,"p10",MomExt(1:4,10)
+!!   print *,"p11",MomExt(1:4,11)
+!!   print *,"p12",MomExt(1:4,12)
 
-   call Kinematics_TTBARPHOTON(1,MomExt(1:4,1:12),(/5,6,4,1,2,3,7,8,9,10,11,12/),applyPSCut,NBin)
+   call Kinematics_TTBARPHOTON(1,MomExt(1:4,1:12),(/5,6,4,1,2,3,7,8,9,10,11,12/),applyPSCut,NBin,PObs)
 
    call setPDFs(eta1,eta2,MuFac,pdf)
 !   IF( PROCESS.EQ.30 ) THEN
@@ -1530,34 +1557,39 @@ else
 
 
         LO_Res_Unpol = LO_Res_Unpol * ISFac * (alpha_s4Pi*RunFactor)**3 * alpha4Pi
-        print *, "LO unpol",LO_Res_UnPol
-        stop
+!        print *, "LO unpol",LO_Res_UnPol
+!        stop
         EvalCS_anomcoupl_Real_ttbqqbgp = EvalCS_anomcoupl_Real_ttbqqbgp + dble(LO_Res_Unpol*PreFac)
 
         do NHisto=1,NumHistograms
-               call intoHisto(NHisto,NBin(NHisto),dble(LO_Res_Unpol*PreFac))
+               call intoHisto(NHisto,NBin(NHisto),dble(LO_Res_Unpol*PreFac),BinValue=PObs(NHisto))
         enddo
 endif!applyPSCut
 
-    PreFacDip = PreFac * ISFac * (alpha_s4Pi*RunFactor)**3 * Q_top**2*alpha4Pi*PhotonCouplCorr /PSWgt2/PSWgt3
+    PreFacDip = PreFac * ISFac * (alpha_s4Pi*RunFactor)**3 * alpha4Pi /PSWgt2/PSWgt3
 !    IF( PROCESS.EQ.30 ) THEN
     IF( PROCESS.EQ.86 ) THEN
-        call EvalDipoles_QQBTTBGP((/MomExt(1:4,5),MomExt(1:4,4),MomExt(1:4,6),-MomExt(1:4,1),-MomExt(1:4,2),MomExt(1:4,3)/),yRnd(11:18),(/PreFacDip*PDFFac(1),PreFacDip*PDFFac(2)/),DipoleResult)
+        call EvalDipoles_QQBTTBGP_anom((/MomExt(1:4,5),MomExt(1:4,4),MomExt(1:4,6),-MomExt(1:4,1),-MomExt(1:4,2),MomExt(1:4,3)/),yRnd(11:18),(/PreFacDip*PDFFac(1),PreFacDip*PDFFac(2)/),DipoleResult)
 !    ELSEIF( PROCESS.EQ.24 ) THEN
     ELSEIF( PROCESS.EQ.83 ) THEN
-        call EvalDipoles_QGTTBQP((/MomExt(1:4,5),MomExt(1:4,4),MomExt(1:4,6),-MomExt(1:4,1),MomExt(1:4,3),-MomExt(1:4,2)/),yRnd(11:18),(/PreFacDip*PDFFac(1),PreFacDip*PDFFac(2)/),DipoleResult)
+        call EvalDipoles_QGTTBQP_anom((/MomExt(1:4,5),MomExt(1:4,4),MomExt(1:4,6),-MomExt(1:4,1),MomExt(1:4,3),-MomExt(1:4,2)/),yRnd(11:18),(/PreFacDip*PDFFac(1),PreFacDip*PDFFac(2)/),DipoleResult)
 !    ELSEIF( PROCESS.EQ.26 ) THEN
     ELSEIF( PROCESS.EQ.84 ) THEN
-        call EvalDipoles_QBGTTBQBP((/MomExt(1:4,5),MomExt(1:4,4),MomExt(1:4,6),MomExt(1:4,3),-MomExt(1:4,1),-MomExt(1:4,2)/),yRnd(11:18),(/PreFacDip*PDFFac(1),PreFacDip*PDFFac(2)/),DipoleResult)
+        call EvalDipoles_QBGTTBQBP_anom((/MomExt(1:4,5),MomExt(1:4,4),MomExt(1:4,6),MomExt(1:4,3),-MomExt(1:4,1),-MomExt(1:4,2)/),yRnd(11:18),(/PreFacDip*PDFFac(1),PreFacDip*PDFFac(2)/),DipoleResult)
     ENDIF
     EvalCS_anomcoupl_Dips_ttbqqbgp = EvalCS_anomcoupl_Dips_ttbqqbgp + DipoleResult(1) + DipoleResult(2)
 
   ENDDO! loop over a<-->b pdfs
 
-
-!      sij = 2d0*(MomExt(1:4,1).dot.MomExt(1:4,3))
-! !      sij = MomExt(1,3)**2
-!      print *,  sij/EHat**2,EvalCS_anomcoupl_Real_ttbqqbgp,EvalCS_anomcoupl_Dips_ttbqqbgp,(1d0+EvalCS_anomcoupl_Real_ttbqqbgp/EvalCS_anomcoupl_Dips_ttbqqbgp)
+ !needed for dipole check  
+  call swapMom(MomExt(1:4,1),MomExt(1:4,2))
+!      sij = 2d0*(MomExt(1:4,2).dot.MomExt(1:4,3))
+      sij = MomExt(1,3)**2
+      print *,  "sij",sij/EHat**2
+      print *, "real,dipole",EvalCS_anomcoupl_Real_ttbqqbgp,EvalCS_anomcoupl_Dips_ttbqqbgp
+      if (abs(EvalCS_anomcoupl_Dips_ttbqqbgp) .gt. 1d-10) then
+         print *, "rel. diff.",(1d0+EvalCS_anomcoupl_Real_ttbqqbgp/EvalCS_anomcoupl_Dips_ttbqqbgp)
+      endif
 !      pause
 
 
@@ -1613,6 +1645,8 @@ endif!applyPSCut
 !        pause
 
     EvalCS_anomcoupl_Real_ttbqqbgp = (EvalCS_anomcoupl_Real_ttbqqbgp + EvalCS_anomcoupl_Dips_ttbqqbgp) /VgsWgt
+    EvalCounter=EvalCounter+1
+    if (EvalCounter .gt. 15) stop
 
 END FUNCTION
 
@@ -1639,7 +1673,7 @@ real(8) :: EHat,PSWgt1,PSWgt2,PSWgt3,ISFac,dip_res_w
 real(8) :: MomExt(1:4,1:12),MomExtTd(1:4,1:12)
 logical :: applyPSCut,applySingCut
 real(8) :: tau,eta1,eta2,sHatJacobi,PreFac,FluxFac,PDFFac_a(1:2),PDFFac_b(1:2),PDFFac(1:2),RunFactor
-real(8) :: pdf(-6:6,1:2),ColCorrLO(1:NumBornAmps,1:NumBornAmps)
+real(8) :: pdf(-6:6,1:2),ColCorrLO(1:NumBornAmps,1:NumBornAmps),PObs(1:NumMaxHisto)
 integer :: NBin(1:NumMaxHisto),NHisto,npdf
 real(8) :: pbDpg,ptDpg,ptDpb,z,omz,Dipole,rsq,y
 real(8), parameter :: CF=4d0/3d0,PhotonCouplCorr=2d0
@@ -1681,7 +1715,7 @@ IF( CORRECTION.EQ.4 ) THEN
 !----------------------------------------
    call EvalPhasespace_TopDecay(MomExt(1:4,4),yRnd(8:11),.false.,MomExt(1:4,6:8),PSWgt2)
    call EvalPhasespace_TopDecay(MomExt(1:4,5),yRnd(12:15),.false.,MomExt(1:4,9:11),PSWgt3)
-   call Kinematics_TTBARPHOTON(0,MomExt(1:4,1:12),(/4,5,3,1,2,0,6,7,8,9,10,11/),applyPSCut,NBin)
+   call Kinematics_TTBARPHOTON(0,MomExt(1:4,1:12),(/4,5,3,1,2,0,6,7,8,9,10,11/),applyPSCut,NBin,PObs)
    if( applyPSCut ) then
       EvalCS_anomcoupl_NLODK_ttbp = 0d0
       return
@@ -1741,7 +1775,7 @@ do npdf=1,2
    EvalCS_anomcoupl_NLODK_ttbp = EvalCS_anomcoupl_NLODK_ttbp + dble(NLO_Res_Unpol)
 
    do NHisto=1,NumHistograms
-      call intoHisto(NHisto,NBin(NHisto),dble(NLO_Res_Unpol))
+      call intoHisto(NHisto,NBin(NHisto),dble(NLO_Res_Unpol),BinValue=PObs(NHisto))
    enddo
 
 enddo! npdf loop
@@ -1812,7 +1846,7 @@ do npdf=1,2
 
 
    do NHisto=1,NumHistograms
-      call intoHisto(NHisto,NBin(NHisto),dble(NLO_Res_Unpol))
+      call intoHisto(NHisto,NBin(NHisto),dble(NLO_Res_Unpol),BinValue=PObs(NHisto))
    enddo
 
 enddo! npdf loop
@@ -1846,7 +1880,7 @@ do npdf=1,2
         call swapMom(MomExt(1:4,1),MomExt(1:4,2))
     endif
     ISFac = MomCrossing(MomExt)
-    call Kinematics_TTBARPHOTON(1,MomExt(1:4,1:12),(/4,5,3,1,2,9,6,7,8,10,11,12/),applyPSCut,NBin)
+    call Kinematics_TTBARPHOTON(1,MomExt(1:4,1:12),(/4,5,3,1,2,9,6,7,8,10,11,12/),applyPSCut,NBin,POBs)
     if( applyPSCut ) then
       goto 14
     endif
@@ -1885,7 +1919,7 @@ do npdf=1,2
    EvalCS_anomcoupl_NLODK_ttbp = EvalCS_anomcoupl_NLODK_ttbp + dble(LO_Res_Unpol)
 
    do NHisto=1,NumHistograms
-      call intoHisto(NHisto,NBin(NHisto),dble(LO_Res_Unpol))
+      call intoHisto(NHisto,NBin(NHisto),dble(LO_Res_Unpol),BinValue=PObs(NHisto))
    enddo
 
 
@@ -1905,7 +1939,7 @@ do npdf=1,2
 
    MomExtTd(1:4,1:5)   = MomExt(1:4,1:5)
    MomExtTd(1:4,10:12) = MomExt(1:4,10:12)
-   call Kinematics_TTBARPHOTON(0,MomExtTd(1:4,1:12),(/4,5,3,1,2,0,6,7,8,10,11,12/),applyPSCut,NBin)
+   call Kinematics_TTBARPHOTON(0,MomExtTd(1:4,1:12),(/4,5,3,1,2,0,6,7,8,10,11,12/),applyPSCut,NBin,PObs)
    if( applyPSCut ) then
       goto 13
    endif
@@ -1942,7 +1976,7 @@ do npdf=1,2
    EvalCS_anomcoupl_NLODK_ttbp = EvalCS_anomcoupl_NLODK_ttbp + Dip_Res_Unpol
 
    do NHisto=1,NumHistograms
-      call intoHisto(NHisto,NBin(NHisto),dble(Dip_Res_Unpol))
+      call intoHisto(NHisto,NBin(NHisto),dble(Dip_Res_Unpol),BinValue=PObs(NHisto))
    enddo
 
 enddo! npdf loop
@@ -1982,7 +2016,7 @@ do npdf=1,2
         call swapMom(MomExt(1:4,1),MomExt(1:4,2))
     endif
     ISFac = MomCrossing(MomExt)
-    call Kinematics_TTBARPHOTON(1,MomExt(1:4,1:12),(/4,5,3,1,2,12,6,7,8,9,10,11/),applyPSCut,NBin)
+    call Kinematics_TTBARPHOTON(1,MomExt(1:4,1:12),(/4,5,3,1,2,12,6,7,8,9,10,11/),applyPSCut,NBin,PObs)
     if( applyPSCut ) then
       goto 15
     endif
@@ -2019,7 +2053,7 @@ do npdf=1,2
    EvalCS_anomcoupl_NLODK_ttbp = EvalCS_anomcoupl_NLODK_ttbp + dble(LO_Res_Unpol)
 
    do NHisto=1,NumHistograms
-      call intoHisto(NHisto,NBin(NHisto),dble(LO_Res_Unpol))
+      call intoHisto(NHisto,NBin(NHisto),dble(LO_Res_Unpol),BinValue=PObs(NHisto))
    enddo
 
 
@@ -2036,7 +2070,7 @@ do npdf=1,2
   Dipole = Dipole * (1d0 - StepFunc(1d0-alpha_DKTfi-z) * StepFunc(y-alpha_DKTfi*(1d0+dsqrt(rsq))**2*z*omz/(z+rsq*omz)) )
 
    MomExtTd(1:4,1:8) = MomExt(1:4,1:8)
-   call Kinematics_TTBARPHOTON(0,MomExtTd(1:4,1:12),(/4,5,3,1,2,0,6,7,8,9,10,11/),applyPSCut,NBin)
+   call Kinematics_TTBARPHOTON(0,MomExtTd(1:4,1:12),(/4,5,3,1,2,0,6,7,8,9,10,11/),applyPSCut,NBin,PObs)
    if( applyPSCut ) then
       goto 17
    endif
@@ -2077,7 +2111,7 @@ do npdf=1,2
 !             pause
 
    do NHisto=1,NumHistograms
-      call intoHisto(NHisto,NBin(NHisto),dble(Dip_Res_Unpol))
+      call intoHisto(NHisto,NBin(NHisto),dble(Dip_Res_Unpol),BinValue=PObs(NHisto))
    enddo
 
 
@@ -2116,7 +2150,7 @@ real(8) :: MomExt(1:4,1:12),MomExtTilde(1:4,1:12), MomExtBornTilde(1:4,1:4)
 logical :: applyPSCut,applySingCut
 integer, parameter :: ParityFlip=1
 real(8) :: tau,eta1,eta2,sHatJacobi,PreFac,FluxFac,PDFFac,RunFactor
-real(8) :: pdf(-6:6,1:2),ColCorrLO(1:NumBornAmps,1:NumBornAmps)
+real(8) :: pdf(-6:6,1:2),ColCorrLO(1:NumBornAmps,1:NumBornAmps),PObs(1:NumMaxHisto)
 integer :: NBin(1:NumMaxHisto),NHisto,nPhoRad
 real(8), parameter :: CF=4d0/3d0,PhotonCouplCorr=2d0
 include "vegas_common.f"
@@ -2172,7 +2206,7 @@ IF( CORRECTION.EQ.4 ) THEN
       PreFac = fbGeV2 * FluxFac * sHatJacobi * PSWgt1*PSWgt2*PSWgt3 * VgsWgt * PDFFac
 
       NLO_Res_Unpol = (0d0,0d0)
-      call Kinematics_TTBARPHOTON(0,MomExt(1:4,1:12),(/3,4,8,1,2,0,5,6,7,9,10,11/),applyPSCut,NBin)
+      call Kinematics_TTBARPHOTON(0,MomExt(1:4,1:12),(/3,4,8,1,2,0,5,6,7,9,10,11/),applyPSCut,NBin,PObs)
       if( applyPSCut ) then
          goto 991
       endif
@@ -2244,7 +2278,7 @@ IF( CORRECTION.EQ.4 ) THEN
 !   galle =1.d0
 !   NBIn(1:NumHistoGrams) = 1
    do NHisto=1,NumHistograms
-      call intoHisto(NHisto,NBin(NHisto),dreal(NLO_Res_UnPol))
+      call intoHisto(NHisto,NBin(NHisto),dreal(NLO_Res_UnPol),BinValue=PObs(NHisto))
 !      call intoHisto(NHisto,NBin(NHisto),galle)
    enddo
 
@@ -2265,7 +2299,7 @@ IF( CORRECTION.EQ.4 ) THEN
    PreFac = fbGeV2 * FluxFac * sHatJacobi * PSWgt1*PSWgt2*PSWgt3 * VgsWgt * PDFFac
 
    NLO_Res_Unpol = (0d0,0d0)
-   call Kinematics_TTBARPHOTON(0,MomExt(1:4,1:12),(/3,4,11,1,2,0,5,6,7,8,9,10/),applyPSCut,NBin)
+   call Kinematics_TTBARPHOTON(0,MomExt(1:4,1:12),(/3,4,11,1,2,0,5,6,7,8,9,10/),applyPSCut,NBin,POBs)
    if( applyPSCut ) then
 !      EvalCS_anomcoupl_NLODKP_ttb = EvalCS_anomcoupl_NLODKP_ttb/VgsWgt
 !      return
@@ -2323,7 +2357,7 @@ IF( CORRECTION.EQ.4 ) THEN
    EvalCS_anomcoupl_NLODKP_ttb = EvalCS_anomcoupl_NLODKP_ttb + dble(NLO_Res_Unpol)
    galle =1.d0
    do NHisto=1,NumHistograms
-      call intoHisto(NHisto,NBin(NHisto),dble(NLO_Res_Unpol))
+      call intoHisto(NHisto,NBin(NHisto),dble(NLO_Res_Unpol),BinValue=PObs(NHisto))
 !      call intoHisto(NHisto,NBin(NHisto),galle)
    enddo
 !   nan_t = IsNan(EvalCS_anomcoupl_NLODKP_ttb  )
@@ -2345,7 +2379,7 @@ IF( CORRECTION.EQ.4 ) THEN
   PreFac = fbGeV2 * FluxFac * sHatJacobi * PSWgt1*PSWgt2 *PSWgt3* VgsWgt * PDFFac
 
    NLO_Res_Unpol = (0.d0,0.d0)
-     call Kinematics_TTBARPHOTON(0,MomExt(1:4,1:12),(/3,4,8,1,2,0,5,6,7,9,10,11/),applyPSCut,NBin)
+     call Kinematics_TTBARPHOTON(0,MomExt(1:4,1:12),(/3,4,8,1,2,0,5,6,7,9,10,11/),applyPSCut,NBin,PObs)
      if( applyPSCut ) then
         goto 3366
      endif
@@ -2409,7 +2443,7 @@ IF( CORRECTION.EQ.4 ) THEN
 !   galle =1.d0
 !   NBIn(1:NumHistoGrams) = 1
    do NHisto=1,NumHistograms
-      call intoHisto(NHisto,NBin(NHisto),dreal(NLO_Res_UnPol))
+      call intoHisto(NHisto,NBin(NHisto),dreal(NLO_Res_UnPol),BinValue=PObs(NHisto))
 !      call intoHisto(NHisto,NBin(NHisto),galle)
    enddo
 !----------------------------------
@@ -2423,7 +2457,7 @@ IF( CORRECTION.EQ.4 ) THEN
     PreFac = fbGeV2 * FluxFac * sHatJacobi * PSWgt1*PSWgt2*PSWgt3 * VgsWgt * PDFFac
 
     NLO_Res_Unpol = (0.d0,0.d0)
-    call Kinematics_TTBARPHOTON(0,MomExt(1:4,1:12),(/3,4,11,1,2,0,5,6,7,8,9,10/),applyPSCut,NBin)
+    call Kinematics_TTBARPHOTON(0,MomExt(1:4,1:12),(/3,4,11,1,2,0,5,6,7,8,9,10/),applyPSCut,NBin,POBs)
     if( applyPSCut ) then
        goto 4444
     endif
@@ -2475,7 +2509,7 @@ IF( CORRECTION.EQ.4 ) THEN
    EvalCS_anomcoupl_NLODKP_ttb = EvalCS_anomcoupl_NLODKP_ttb + dble(NLO_Res_Unpol)
 
    do NHisto=1,NumHistograms
-      call intoHisto(NHisto,NBin(NHisto),dble(NLO_Res_Unpol))
+      call intoHisto(NHisto,NBin(NHisto),dble(NLO_Res_Unpol),BinValue=PObs(NHisto))
 !      call intoHisto(NHisto,NBin(NHisto),galle)
    enddo
 
@@ -2507,7 +2541,7 @@ IF( CORRECTION.EQ.4 ) THEN
 
 
     NLO_Res_Unpol = (0.d0,0.d0)
-     call Kinematics_TTBARPHOTON(0,MomExt(1:4,1:12),(/3,4,8,1,2,0,5,6,7,9,10,11/),applyPSCut,NBin)
+     call Kinematics_TTBARPHOTON(0,MomExt(1:4,1:12),(/3,4,8,1,2,0,5,6,7,9,10,11/),applyPSCut,NBin,PObs)
      if( applyPSCut ) then
         cycle
      endif
@@ -2580,7 +2614,7 @@ IF( CORRECTION.EQ.4 ) THEN
 !   galle =1.d0
 !   NBIn(1:NumHistoGrams) = 1
    do NHisto=1,NumHistograms
-      call intoHisto(NHisto,NBin(NHisto),dreal(NLO_Res_UnPol))
+      call intoHisto(NHisto,NBin(NHisto),dreal(NLO_Res_UnPol),BinValue=PObs(NHisto))
 !      call intoHisto(NHisto,NBin(NHisto),galle)
    enddo
 enddo ! nPhorad
@@ -2601,7 +2635,7 @@ enddo ! nPhorad
     PreFac = fbGeV2 * FluxFac * sHatJacobi * PSWgt1*PSWgt2*PSWgt3 * VgsWgt * PDFFac
 
     NLO_Res_Unpol = (0.d0,0.d0)
-    call Kinematics_TTBARPHOTON(0,MomExt(1:4,1:12),(/3,4,11,1,2,0,5,6,7,8,9,10/),applyPSCut,NBin)
+    call Kinematics_TTBARPHOTON(0,MomExt(1:4,1:12),(/3,4,11,1,2,0,5,6,7,8,9,10/),applyPSCut,NBin,PObs)
     if( applyPSCut ) then
        cycle
     endif
@@ -2662,7 +2696,7 @@ enddo ! nPhorad
 !   galle =1.d0
 
    do NHisto=1,NumHistograms
-      call intoHisto(NHisto,NBin(NHisto),dble(NLO_Res_Unpol))
+      call intoHisto(NHisto,NBin(NHisto),dble(NLO_Res_Unpol),BinValue=PObs(NHisto))
 !      call intoHisto(NHisto,NBin(NHisto),galle)
    enddo
 
@@ -2692,7 +2726,7 @@ ELSEIF (CORRECTION .eq. 5) then
       endif
 !goto 191
 !      count_t1=0
-      call Kinematics_TTBARPHOTON(1,MomExt(1:4,1:12),(/3,4,9,1,2,8,5,6,7,10,11,12/),applyPSCut,NBin)
+      call Kinematics_TTBARPHOTON(1,MomExt(1:4,1:12),(/3,4,9,1,2,8,5,6,7,10,11,12/),applyPSCut,NBin,PObs)
       NLO_Res_Unpol = (0.d0,0.d0)
       if( applyPSCut ) then
          goto 191
@@ -2735,7 +2769,7 @@ ELSEIF (CORRECTION .eq. 5) then
 
 
       do NHisto=1,NumHistograms
-         call intoHisto(NHisto,NBin(NHisto),dble(NLO_Res_Unpol))
+         call intoHisto(NHisto,NBin(NHisto),dble(NLO_Res_Unpol),BinValue=PObs(NHisto))
       enddo
 
 ! print *, (MomExt(1:4,8).dot.MomExt(1:4,5))/m_top**2
@@ -2750,7 +2784,7 @@ ELSEIF (CORRECTION .eq. 5) then
       Top_Atop =-1
       MomExtTilde = MomExt
       call EvalTTBP_DIPOLDK(Top_Atop,MomExt(1:4,5:9),MomExtTilde(1:4,5:9),dipole)
-      call Kinematics_TTBARPHOTON(0,MomExtTilde(1:4,1:12),(/3,4,9,1,2,0,5,6,7,10,11,12/),applyPSCut,NBin)
+      call Kinematics_TTBARPHOTON(0,MomExtTilde(1:4,1:12),(/3,4,9,1,2,0,5,6,7,10,11,12/),applyPSCut,NBin,PObs)
       if (applyPScut) then
          goto 1999
       endif
@@ -2794,7 +2828,7 @@ ELSEIF (CORRECTION .eq. 5) then
 
       EvalCS_anomcoupl_NLODKP_ttb = EvalCS_anomcoupl_NLODKP_ttb + dble(Dip_Res_Unpol)
       do NHisto=1,NumHistograms
-         call intoHisto(NHisto,NBin(NHisto),dble(Dip_Res_Unpol))
+         call intoHisto(NHisto,NBin(NHisto),dble(Dip_Res_Unpol),BinValue=PObs(NHisto))
       enddo
 
 ! if(dble(Dip_Res_Unpol).ne.0d0.and.abs(-dble(Dip_Res_Unpol)/dble(NLO_Res_Unpol)-1d0).gt.1d-2) then
@@ -2864,7 +2898,7 @@ ELSEIF (CORRECTION .eq. 5) then
       endif
 
       PreFac = fbGeV2 * FluxFac * sHatJacobi * PSWgt1*PSWgt2*PSWgt3 * VgsWgt * PDFFac
-      call Kinematics_TTBARPHOTON(1,MomExt(1:4,1:12),(/3,4,12,1,2,11,5,6,7,8,9,10/),applyPSCut,NBin)
+      call Kinematics_TTBARPHOTON(1,MomExt(1:4,1:12),(/3,4,12,1,2,11,5,6,7,8,9,10/),applyPSCut,NBin,PObs)
 
       NLO_Res_Unpol = (0.d0,0.d0)
       if( applyPSCut ) then
@@ -2904,7 +2938,7 @@ ELSEIF (CORRECTION .eq. 5) then
       EvalCS_anomcoupl_NLODKP_ttb = EvalCS_anomcoupl_NLODKP_ttb + dble(NLO_Res_Unpol)
 
       do NHisto=1,NumHistograms
-         call intoHisto(NHisto,NBin(NHisto),dble(NLO_Res_Unpol))
+         call intoHisto(NHisto,NBin(NHisto),dble(NLO_Res_Unpol),BinValue=PObs(NHisto))
       enddo
 !      write(*,*) "RealBin", NBin
 
@@ -2919,7 +2953,7 @@ ELSEIF (CORRECTION .eq. 5) then
       Dip_Res_Unpol = (0.d0,0.d0)
       Top_Atop =1
       call EvalTTBP_DIPOLDK(Top_Atop,MomExt(1:4,8:12),MomExtTilde(1:4,8:12),dipole)
-      call Kinematics_TTBARPHOTON(0,MomExtTilde(1:4,1:12),(/3,4,12,1,2,0,5,6,7,8,9,10/),applyPSCut,NBin)
+      call Kinematics_TTBARPHOTON(0,MomExtTilde(1:4,1:12),(/3,4,12,1,2,0,5,6,7,8,9,10/),applyPSCut,NBin,PObs)
       if (applyPScut) then
 !         EvalCS_anomcoupl_NLODKP_ttb = EvalCS_anomcoupl_NLODKP_ttb/VgsWgt
 !         return
@@ -2960,7 +2994,7 @@ ELSEIF (CORRECTION .eq. 5) then
 
 
       do NHisto=1,NumHistograms
-         call intoHisto(NHisto,NBin(NHisto),dble(Dip_Res_Unpol))
+         call intoHisto(NHisto,NBin(NHisto),dble(Dip_Res_Unpol),BinValue=PObs(NHisto))
       enddo
 
 !      soft =  MomExt(1,11)/m_top
@@ -3032,7 +3066,7 @@ ELSEIF (CORRECTION .eq. 5) then
        goto 1881
     endif
 
-    call Kinematics_TTBARPHOTON(1,MomExt(1:4,1:12),(/3,4,8,1,2,9,5,6,7,10,11,12/),applyPSCut,NBin)
+    call Kinematics_TTBARPHOTON(1,MomExt(1:4,1:12),(/3,4,8,1,2,9,5,6,7,10,11,12/),applyPSCut,NBin,PObs)
     NLO_Res_Unpol = (0.d0,0.d0)
 
     if( applyPSCut ) then
@@ -3071,7 +3105,7 @@ ELSEIF (CORRECTION .eq. 5) then
       EvalCS_anomcoupl_NLODKP_ttb = EvalCS_anomcoupl_NLODKP_ttb + dble(NLO_Res_Unpol)
 
       do NHisto=1,NumHistograms
-         call intoHisto(NHisto,NBin(NHisto),dble(NLO_Res_Unpol))
+         call intoHisto(NHisto,NBin(NHisto),dble(NLO_Res_Unpol),BinValue=PObs(NHisto))
       enddo
 
 811  continue
@@ -3090,7 +3124,7 @@ ELSEIF (CORRECTION .eq. 5) then
       Dipole = Dipole * (1d0 - StepFunc(1d0-alpha_DKTfi-z) * StepFunc(y-alpha_DKTfi*(1d0+dsqrt(rsq))**2*z*omz/(z+rsq*omz)) )
 
       Dip_Res_UnPol =(0.d0,0.d0)
-      call Kinematics_TTBARPHOTON(0,MomExtTilde(1:4,1:12),(/3,4,8,1,2,0,5,6,7,10,11,12/),applyPSCut,NBin)
+      call Kinematics_TTBARPHOTON(0,MomExtTilde(1:4,1:12),(/3,4,8,1,2,0,5,6,7,10,11,12/),applyPSCut,NBin,PObs)
       if( applyPSCut ) then
          goto 1881
       endif
@@ -3131,7 +3165,7 @@ ELSEIF (CORRECTION .eq. 5) then
 !         pause
 !      endif
       do NHisto=1,NumHistograms
-         call intoHisto(NHisto,NBin(NHisto),dble(Dip_Res_Unpol))
+         call intoHisto(NHisto,NBin(NHisto),dble(Dip_Res_Unpol),BinValue=PObs(NHisto))
       enddo
 
    if( IsNan(EvalCS_anomcoupl_NLODKP_ttb )) then
@@ -3181,7 +3215,7 @@ ELSEIF (CORRECTION .eq. 5) then
 !    write(*,*) "hall"
 !   PreFac = fbGeV2 * FluxFac * sHatJacobi * PSWgt1*PSWgt2*PSWgt3 * VgsWgt * PDFFac
 
-    call Kinematics_TTBARPHOTON(1,MomExt(1:4,1:12),(/3,4,11,1,2,12,5,6,7,8,9,10/),applyPSCut,NBin)
+    call Kinematics_TTBARPHOTON(1,MomExt(1:4,1:12),(/3,4,11,1,2,12,5,6,7,8,9,10/),applyPSCut,NBin,PObs)
     NLO_Res_Unpol = (0.d0,0.d0)
     if( applyPSCut ) then
       goto 188
@@ -3228,7 +3262,7 @@ ELSEIF (CORRECTION .eq. 5) then
 
 
       do NHisto=1,NumHistograms
-         call intoHisto(NHisto,NBin(NHisto),dble(NLO_Res_Unpol))
+         call intoHisto(NHisto,NBin(NHisto),dble(NLO_Res_Unpol),BinValue=PObs(NHisto))
       enddo
 !      write(*,*) "RealBin", NBin
 
@@ -3249,7 +3283,7 @@ ELSEIF (CORRECTION .eq. 5) then
       Dipole = Dipole * (1d0 - StepFunc(1d0-alpha_DKTfi-z) * StepFunc(y-alpha_DKTfi*(1d0+dsqrt(rsq))**2*z*omz/(z+rsq*omz)) )
 
       Dip_Res_UnPol =(0.d0,0.d0)
-      call Kinematics_TTBARPHOTON(0,MomExtTilde(1:4,1:12),(/3,4,11,1,2,0,5,6,7,8,9,10/),applyPSCut,NBin)
+      call Kinematics_TTBARPHOTON(0,MomExtTilde(1:4,1:12),(/3,4,11,1,2,0,5,6,7,8,9,10/),applyPSCut,NBin,PObs)
       if (applyPScut) then
          goto 3333
       endif
@@ -3295,7 +3329,7 @@ ELSEIF (CORRECTION .eq. 5) then
 !         pause
 !      endif
       do NHisto=1,NumHistograms
-         call intoHisto(NHisto,NBin(NHisto),dble(Dip_Res_Unpol))
+         call intoHisto(NHisto,NBin(NHisto),dble(Dip_Res_Unpol),BinValue=PObs(NHisto))
       enddo
 
       if( IsNan(EvalCS_anomcoupl_NLODKP_ttb )) then
@@ -3363,7 +3397,7 @@ ELSEIF (CORRECTION .eq. 5) then
        goto 7777
     endif
 
-    call Kinematics_TTBARPHOTON(1,MomExt(1:4,1:12),(/3,4,8,1,2,12,5,6,7,9,10,11/),applyPSCut,NBin)
+    call Kinematics_TTBARPHOTON(1,MomExt(1:4,1:12),(/3,4,8,1,2,12,5,6,7,9,10,11/),applyPSCut,NBin,PObs)
       NLO_Res_Unpol = (0.d0,0.d0)
 
       if( applyPSCut ) then
@@ -3422,7 +3456,7 @@ ELSEIF (CORRECTION .eq. 5) then
 
 
       do NHisto=1,NumHistograms
-         call intoHisto(NHisto,NBin(NHisto),dble(NLO_Res_Unpol))
+         call intoHisto(NHisto,NBin(NHisto),dble(NLO_Res_Unpol),BinValue=PObs(NHisto))
       enddo
 
 
@@ -3444,7 +3478,7 @@ ELSEIF (CORRECTION .eq. 5) then
       Dipole = Dipole * (1d0 - StepFunc(1d0-alpha_DKTfi-z) * StepFunc(y-alpha_DKTfi*(1d0+dsqrt(rsq))**2*z*omz/(z+rsq*omz)) )
 
       Dip_Res_UnPol =(0.d0,0.d0)
-      call Kinematics_TTBARPHOTON(0,MomExtTilde(1:4,1:12),(/3,4,8,1,2,0,5,6,7,9,10,11/),applyPSCut,NBin)
+      call Kinematics_TTBARPHOTON(0,MomExtTilde(1:4,1:12),(/3,4,8,1,2,0,5,6,7,9,10,11/),applyPSCut,NBin,PObs)
       if( applyPSCut ) then
          cycle
       endif
@@ -3487,7 +3521,7 @@ ELSEIF (CORRECTION .eq. 5) then
 
       EvalCS_anomcoupl_NLODKP_ttb = EvalCS_anomcoupl_NLODKP_ttb + dble(Dip_Res_Unpol)
       do NHisto=1,NumHistograms
-         call intoHisto(NHisto,NBin(NHisto),dble(Dip_Res_Unpol))
+         call intoHisto(NHisto,NBin(NHisto),dble(Dip_Res_Unpol),BinValue=PObs(NHisto))
       enddo
 
 !         soft =  MomExt(1,12)/m_top
@@ -3543,7 +3577,7 @@ ELSEIF (CORRECTION .eq. 5) then
 
     PreFac = fbGeV2 * FluxFac * sHatJacobi * PSWgt1*PSWgt2*PSWgt3 * VgsWgt * PDFFac
 
-    call Kinematics_TTBARPHOTON(1,MomExt(1:4,1:12),(/3,4,12,1,2,8,5,6,7,9,10,11/),applyPSCut,NBin)
+    call Kinematics_TTBARPHOTON(1,MomExt(1:4,1:12),(/3,4,12,1,2,8,5,6,7,9,10,11/),applyPSCut,NBin,PObs)
     NLO_Res_Unpol = (0.d0,0.d0)
     if( applyPSCut ) then
       goto 7711
@@ -3588,7 +3622,7 @@ ELSEIF (CORRECTION .eq. 5) then
 
 
       do NHisto=1,NumHistograms
-         call intoHisto(NHisto,NBin(NHisto),dble(NLO_Res_Unpol))
+         call intoHisto(NHisto,NBin(NHisto),dble(NLO_Res_Unpol),BinValue=PObs(NHisto))
       enddo
 !      write(*,*) "RealBin", NBin
 
@@ -3612,7 +3646,7 @@ ELSEIF (CORRECTION .eq. 5) then
 
       Dip_Res_UnPol =(0.d0,0.d0)
 
-      call Kinematics_TTBARPHOTON(0,MomExtTilde(1:4,1:12),(/3,4,12,1,2,0,5,6,7,9,10,11/),applyPSCut,NBin)
+      call Kinematics_TTBARPHOTON(0,MomExtTilde(1:4,1:12),(/3,4,12,1,2,0,5,6,7,9,10,11/),applyPSCut,NBin,PObs)
 
       if (applyPScut) then
          cycle
@@ -3656,7 +3690,7 @@ ELSEIF (CORRECTION .eq. 5) then
 
 
       do NHisto=1,NumHistograms
-         call intoHisto(NHisto,NBin(NHisto),dble(Dip_Res_Unpol))
+         call intoHisto(NHisto,NBin(NHisto),dble(Dip_Res_Unpol),BinValue=PObs(NHisto))
       enddo
 
 !      soft =  MomExt(1,8)/m_top
@@ -3731,7 +3765,7 @@ real(8) ::  yRnd(1:VegasMxDim),VgsWgt,IOp(-2:0),HOp(1:3)
 complex(8) :: rdiv(1:2),LO_Res_Pol,LO_Res_Unpol,NLO_Res_Pol(-2:1),NLO_Res_UnPol(-2:1),NLO_Res_Unpol_Ferm(-2:1),FermionLoopPartAmp(7:8,-2:1)
 integer :: iHel,jHel,kHel,iPrimAmp,jPrimAmp,nPhoRad,PhoHel
 real(8) :: EHat,RunFactor,PSWgt,PSWgt2,PSWgt3,ISFac
-real(8) :: MomExt(1:4,1:12),MomP(1:4,1:4)
+real(8) :: MomExt(1:4,1:12),MomP(1:4,1:4),PObs(1:NumMaxHisto)
 logical :: applyPSCut
 real(8) :: eta1,eta2,sHatJacobi,PreFac,FluxFac,PDFFac,AccPoles
 real(8) :: pdf(-6:6,1:2),pdf_z(-6:6,1:2),xE
@@ -3777,7 +3811,7 @@ do nPhoRad=nPhoRad1,nPhoRad2!   nPhoRad=1: photon radiation off top/bot/W, nPhoR
    call EvalPhasespace_TopDecay(MomExt(1:4,4),yRnd(12:15),.false.,MomExt(1:4,9:11),PSWgt3)
    PreFac = fbGeV2 * FluxFac * sHatJacobi * PSWgt*PSWgt2*PSWgt3 * VgsWgt * PDFFac * dble(NumHelicities/(nHel(2)-nHel(1)+1))
 
-   call Kinematics_TTBARPHOTON(0,MomExt(1:4,1:12),(/3,4,8,1,2,0,5,6,7,9,10,11/),applyPSCut,NBin)
+   call Kinematics_TTBARPHOTON(0,MomExt(1:4,1:12),(/3,4,8,1,2,0,5,6,7,9,10,11/),applyPSCut,NBin,PObs)
    if( applyPSCut ) then
       cycle
    endif
@@ -3961,7 +3995,7 @@ ELSEIF( Correction.EQ.3 ) THEN
 ENDIF
 
    do NHisto=1,NumHistograms
-      call intoHisto(NHisto,NBin(NHisto),EvalCS_anomcoupl_DKP_1L_ttbgg)
+      call intoHisto(NHisto,NBin(NHisto),EvalCS_anomcoupl_DKP_1L_ttbgg,BinValue=PObs(NHisto))
    enddo
 
 EvalCS_anomcoupl_DKP_1L_ttbgg_1 = EvalCS_anomcoupl_DKP_1L_ttbgg_1 + EvalCS_anomcoupl_DKP_1L_ttbgg
@@ -3991,7 +4025,7 @@ do nPhoRad=nPhoRad1,nPhoRad2!   nPhoRad=1: photon radiation off top/bot/W,nPhoRa
    endif
    PreFac = fbGeV2 * FluxFac * sHatJacobi * PSWgt*PSWgt2*PSWgt3 * VgsWgt * PDFFac * dble(NumHelicities/(nHel(2)-nHel(1)+1))
 
-   call Kinematics_TTBARPHOTON(0,MomExt(1:4,1:12),(/3,4,11,1,2,0,5,6,7,8,9,10/),applyPSCut,NBin)
+   call Kinematics_TTBARPHOTON(0,MomExt(1:4,1:12),(/3,4,11,1,2,0,5,6,7,8,9,10/),applyPSCut,NBin,PObs)
    if( applyPSCut ) then
       cycle
    endif
@@ -4177,7 +4211,7 @@ ELSEIF( Correction.EQ.3 ) THEN
 ENDIF
 
    do NHisto=1,NumHistograms
-      call intoHisto(NHisto,NBin(NHisto),EvalCS_anomcoupl_DKP_1L_ttbgg)
+      call intoHisto(NHisto,NBin(NHisto),EvalCS_anomcoupl_DKP_1L_ttbgg,BinValue=PObs(NHisto))
    enddo
 
    EvalCS_anomcoupl_DKP_1L_ttbgg_2 = EvalCS_anomcoupl_DKP_1L_ttbgg_2 + EvalCS_anomcoupl_DKP_1L_ttbgg
@@ -4216,7 +4250,7 @@ complex(8) :: rdiv(1:2),LO_Res_Pol,LO_Res_Unpol,NLO_Res_Pol(-2:1),NLO_Res_UnPol(
 complex(8) :: BosonicPartAmp(1:2,-2:1),FermionPartAmp(1:2,-2:1)
 integer :: iHel,iPrimAmp,jPrimAmp,nPhoRad,PhoHel
 real(8) :: EHat,RunFactor,PSWgt,PSWgt2,PSWgt3,ISFac
-real(8) :: MomExt(1:4,1:12),MomP(1:4,1:4)
+real(8) :: MomExt(1:4,1:12),MomP(1:4,1:4),PObs(1:NumMaxHisto)
 logical :: applyPSCut
 real(8),parameter :: Nc=3d0
 real(8) :: tau,eta1,eta2,sHatJacobi,PreFac,FluxFac,PDFFac_a,PDFFac_b,PDFFac,AccPoles
@@ -4267,7 +4301,7 @@ do nPhoRad=nPhoRad1,nPhoRad2!   nPhoRad=1: photon radiation off top/bot/W, nPhoR
    call EvalPhasespace_TopDecay(MomExt(1:4,4),yRnd(12:15),.false.,MomExt(1:4,9:11),PSWgt3)
    PreFac = fbGeV2 * FluxFac * sHatJacobi * PSWgt*PSWgt2*PSWgt3 * VgsWgt * dble(NumHelicities/(nHel(2)-nHel(1)+1))
 
-   call Kinematics_TTBARPHOTON(0,MomExt(1:4,1:12),(/3,4,8,1,2,0,5,6,7,9,10,11/),applyPSCut,NBin)
+   call Kinematics_TTBARPHOTON(0,MomExt(1:4,1:12),(/3,4,8,1,2,0,5,6,7,9,10,11/),applyPSCut,NBin,PObs)
    if( applyPSCut ) then
       cycle
    endif
@@ -4512,7 +4546,7 @@ ENDIF
 ENDIF
 
    do NHisto=1,NumHistograms
-      call intoHisto(NHisto,NBin(NHisto),EvalCS_anomcoupl_DKP_1L_ttbqqb)
+      call intoHisto(NHisto,NBin(NHisto),EvalCS_anomcoupl_DKP_1L_ttbqqb,BinValue=PObs(NHisto))
    enddo
 
 EvalCS_anomcoupl_DKP_1L_ttbqqb_1 = EvalCS_anomcoupl_DKP_1L_ttbqqb_1 + EvalCS_anomcoupl_DKP_1L_ttbqqb
@@ -4539,7 +4573,7 @@ do nPhoRad=nPhoRad1,nPhoRad2!   nPhoRad=1: photon radiation off top/bot/W, nPhoR
    endif
    PreFac = fbGeV2 * FluxFac * sHatJacobi * PSWgt*PSWgt2*PSWgt3 * VgsWgt * dble(NumHelicities/(nHel(2)-nHel(1)+1))
 
-   call Kinematics_TTBARPHOTON(0,MomExt(1:4,1:12),(/3,4,11,1,2,0,5,6,7,8,9,10/),applyPSCut,NBin)
+   call Kinematics_TTBARPHOTON(0,MomExt(1:4,1:12),(/3,4,11,1,2,0,5,6,7,8,9,10/),applyPSCut,NBin,PObs)
    if( applyPSCut ) then
       cycle
    endif
@@ -4783,7 +4817,7 @@ ENDIF
 ENDIF
 
    do NHisto=1,NumHistograms
-      call intoHisto(NHisto,NBin(NHisto),EvalCS_anomcoupl_DKP_1L_ttbqqb)
+      call intoHisto(NHisto,NBin(NHisto),EvalCS_anomcoupl_DKP_1L_ttbqqb,BinValue=PObs(NHisto))
    enddo
 
    EvalCS_anomcoupl_DKP_1L_ttbqqb_2 = EvalCS_anomcoupl_DKP_1L_ttbqqb_2 + EvalCS_anomcoupl_DKP_1L_ttbqqb
@@ -4818,7 +4852,7 @@ real(8) :: EHat,RunFactor,PSWgt,PSWgt2,PSWgt3,DipoleResult,ISFac
 real(8) :: MomExt(1:4,1:12)
 logical :: applyPSCut,applySingCut
 real(8) :: tau,eta1,eta2,sHatJacobi,PreFac,FluxFac,PDFFac
-real(8) :: pdf(-6:6,1:2)
+real(8) :: pdf(-6:6,1:2),PObs(1:NumMaxHisto)
 integer :: NBin(1:NumMaxHisto),NHisto,ParityFlip
 real(8) :: s13,s23,s12,s55
 include "vegas_common.f"
@@ -4886,7 +4920,7 @@ do nPhoRad=nPhoRad1,nPhoRad2!   nPhoRad=1: photon radiation off top/bot/W,nPhoRa
    call EvalPhasespace_TopDecay(MomExt(1:4,5),yRnd(15:18),.false.,MomExt(1:4,10:12),PSWgt3)
    PreFac = fbGeV2 * FluxFac * sHatJacobi * PSWgt*PSWgt2*PSWgt3 * VgsWgt * PDFFac
 
-   call Kinematics_TTBARPHOTON(1,MomExt(1:4,1:12),(/4,5,9,1,2,3,6,7,8,10,11,12/),applyPSCut,NBin)
+   call Kinematics_TTBARPHOTON(1,MomExt(1:4,1:12),(/4,5,9,1,2,3,6,7,8,10,11,12/),applyPSCut,NBin,PObs)
    if( applyPSCut ) then
       EvalCS_anomcoupl_DKP_Real_ttbggg = 0d0
       goto 50
@@ -4919,7 +4953,7 @@ do nPhoRad=nPhoRad1,nPhoRad2!   nPhoRad=1: photon radiation off top/bot/W,nPhoRa
       EvalCS_anomcoupl_DKP_Real_ttbggg = LO_Res_UnPol * PreFac * (alpha_s4Pi*RunFactor)**3 * ISFac
 
       do NHisto=1,NumHistograms
-          call intoHisto(NHisto,NBin(NHisto),EvalCS_anomcoupl_DKP_Real_ttbggg)
+          call intoHisto(NHisto,NBin(NHisto),EvalCS_anomcoupl_DKP_Real_ttbggg,BinValue=PObs(NHisto))
       enddo
 
 
@@ -4954,7 +4988,7 @@ do nPhoRad=nPhoRad1,nPhoRad2!   nPhoRad=1: photon radiation off top/bot/W, nPhoR
    endif
    PreFac = fbGeV2 * FluxFac * sHatJacobi * PSWgt*PSWgt2*PSWgt3 * VgsWgt * PDFFac
 
-   call Kinematics_TTBARPHOTON(1,MomExt(1:4,1:12),(/4,5,12,1,2,3,6,7,8,9,10,11/),applyPSCut,NBin)
+   call Kinematics_TTBARPHOTON(1,MomExt(1:4,1:12),(/4,5,12,1,2,3,6,7,8,9,10,11/),applyPSCut,NBin,PObs)
    if( applyPSCut ) then
       EvalCS_anomcoupl_DKP_Real_ttbggg = 0d0
       goto 51
@@ -4988,7 +5022,7 @@ do nPhoRad=nPhoRad1,nPhoRad2!   nPhoRad=1: photon radiation off top/bot/W, nPhoR
       EvalCS_anomcoupl_DKP_Real_ttbggg = LO_Res_UnPol * PreFac * (alpha_s4Pi*RunFactor)**3 * ISFac
 
       do NHisto=1,NumHistograms
-          call intoHisto(NHisto,NBin(NHisto),EvalCS_anomcoupl_DKP_Real_ttbggg)
+          call intoHisto(NHisto,NBin(NHisto),EvalCS_anomcoupl_DKP_Real_ttbggg,BinValue=PObs(NHisto))
       enddo
 
 
@@ -5048,7 +5082,7 @@ complex(8) :: LO_Res_Pol,LO_Res_Unpol
 integer :: iHel,iPrimAmp,jPrimAmp,nPhoRad,PhoHel
 real(8) :: EHat,RunFactor,PSWgt,PSWgt2,PSWgt3,s12,s13
 real(8) :: PDFFac_a,PDFFac_b,PDFFac,pdf(-6:6,1:2),tau,eta1,eta2,FluxFac,sHatJacobi,ISFac,PreFac
-real(8) :: MomExt(1:4,1:12)
+real(8) :: MomExt(1:4,1:12),PObs(1:NumMaxHisto)
 integer :: NBin(1:NumMaxHisto),NHisto,ParityFlip,npdf
 logical :: applyPSCut,applySingCut
 include "vegas_common.f"
@@ -5126,7 +5160,7 @@ do nPhoRad=nPhoRad1,nPhoRad2!   nPhoRad=1: photon radiation off top/bot/W, nPhoR
         ISFac = MomCrossing(MomExt)
         PreFac = fbGeV2 * FluxFac * sHatJacobi * PSWgt*PSWgt2*PSWgt3 * VgsWgt * PDFFac
 
-        call Kinematics_TTBARPHOTON(1,MomExt(1:4,1:12),(/4,5,9,1,2,3,6,7,8,10,11,12/),applyPSCut,NBin)
+        call Kinematics_TTBARPHOTON(1,MomExt(1:4,1:12),(/4,5,9,1,2,3,6,7,8,10,11,12/),applyPSCut,NBin,PObs)
         if( applyPSCut ) then
             EvalCS_anomcoupl_DKP_Real_ttbqqbg = 0d0
             goto 60
@@ -5160,7 +5194,7 @@ do nPhoRad=nPhoRad1,nPhoRad2!   nPhoRad=1: photon radiation off top/bot/W, nPhoR
       EvalCS_anomcoupl_DKP_Real_ttbqqbg = LO_Res_UnPol * PreFac * (alpha_s4Pi*RunFactor)**3 * ISFac
 
       do NHisto=1,NumHistograms
-          call intoHisto(NHisto,NBin(NHisto),EvalCS_anomcoupl_DKP_Real_ttbqqbg)
+          call intoHisto(NHisto,NBin(NHisto),EvalCS_anomcoupl_DKP_Real_ttbqqbg,BinValue=PObs(NHisto))
       enddo
 
 
@@ -5211,7 +5245,7 @@ do nPhoRad=nPhoRad1,nPhoRad2!   nPhoRad=1: photon radiation off top/bot/W, nPhoR
         ISFac = MomCrossing(MomExt)
         PreFac = fbGeV2 * FluxFac * sHatJacobi * PSWgt*PSWgt2*PSWgt3 * VgsWgt * PDFFac
 
-        call Kinematics_TTBARPHOTON(1,MomExt(1:4,1:12),(/4,5,12,1,2,3,6,7,8,9,10,11/),applyPSCut,NBin)
+        call Kinematics_TTBARPHOTON(1,MomExt(1:4,1:12),(/4,5,12,1,2,3,6,7,8,9,10,11/),applyPSCut,NBin,PObs)
         if( applyPSCut ) then
             EvalCS_anomcoupl_DKP_Real_ttbqqbg = 0d0
             goto 61
@@ -5244,7 +5278,7 @@ do nPhoRad=nPhoRad1,nPhoRad2!   nPhoRad=1: photon radiation off top/bot/W, nPhoR
       EvalCS_anomcoupl_DKP_Real_ttbqqbg = LO_Res_UnPol * PreFac * (alpha_s4Pi*RunFactor)**3 * ISFac
 
       do NHisto=1,NumHistograms
-          call intoHisto(NHisto,NBin(NHisto),EvalCS_anomcoupl_DKP_Real_ttbqqbg)
+          call intoHisto(NHisto,NBin(NHisto),EvalCS_anomcoupl_DKP_Real_ttbqqbg,BinValue=PObs(NHisto))
       enddo
 
 
