@@ -3329,7 +3329,7 @@ ELSEIF( ObsSet.EQ.29 ) THEN! set of observables for ttbgamma production without 
 
           if(Collider.ne.1)  call Error("Collider needs to be LHC!")
           if(TopDecays.ne.4 .and. TopDecays.ne.3) call Error("TopDecays needs to be 3 (for Qt=-4/3) or 4 (for Qt=Qup)")
-          NumHistograms = 33
+          NumHistograms = 30
           if( .not.allocated(Histo) ) then
                 allocate( Histo(1:NumHistograms), stat=AllocStatus  )
                 if( AllocStatus .ne. 0 ) call Error("Memory allocation in Histo")
@@ -3455,23 +3455,23 @@ ELSEIF( ObsSet.EQ.29 ) THEN! set of observables for ttbgamma production without 
           Histo(20)%LowVal = 0d0
           Histo(20)%SetScale= 1d0
 
-          Histo(21)%Info   = "R(lep,bjet1)"
-          Histo(21)%NBins  = 25
-          Histo(21)%BinSize= 0.25d0
-          Histo(21)%LowVal = 0d0
-          Histo(21)%SetScale= 1d0
-
-          Histo(22)%Info   = "R(lep,bjet2)"
-          Histo(22)%NBins  = 25
-          Histo(22)%BinSize= 0.25d0
-          Histo(22)%LowVal = 0d0
-          Histo(22)%SetScale= 1d0
-
-          Histo(23)%Info   = "R(lep,jet1)"
-          Histo(23)%NBins  = 25
-          Histo(23)%BinSize= 0.25d0
-          Histo(23)%LowVal = 0d0
-          Histo(23)%SetScale= 1d0
+          Histo(21)%Info   = "m_jjb"
+          Histo(21)%NBins  = 40
+          Histo(21)%BinSize= 25d0*GeV
+          Histo(21)%LowVal =  0d0*GeV
+          Histo(21)%SetScale= 100d0
+                
+          Histo(22)%Info   = "mTblP"
+          Histo(22)%NBins  = 40
+          Histo(22)%BinSize= 25d0*GeV
+          Histo(22)%LowVal =  0d0*GeV
+          Histo(22)%SetScale= 100d0
+                
+          Histo(23)%Info   = "mT_lp"
+          Histo(23)%NBins  = 40
+          Histo(23)%BinSize= 25d0*GeV
+          Histo(23)%LowVal =  0d0*GeV
+          Histo(23)%SetScale= 100d0
 
           Histo(24)%Info   = "R(lep,jet2)"
           Histo(24)%NBins  = 25
@@ -3515,23 +3515,6 @@ ELSEIF( ObsSet.EQ.29 ) THEN! set of observables for ttbgamma production without 
           Histo(30)%LowVal =  0d0*GeV
           Histo(30)%SetScale= 100d0
 
-          Histo(31)%Info   = "m_jjb"
-          Histo(31)%NBins  = 40
-          Histo(31)%BinSize= 25d0*GeV
-          Histo(31)%LowVal =  0d0*GeV
-          Histo(31)%SetScale= 100d0
-
-          Histo(32)%Info   = "mTblP"
-          Histo(32)%NBins  = 40
-          Histo(32)%BinSize= 25d0*GeV
-          Histo(32)%LowVal =  0d0*GeV
-          Histo(32)%SetScale= 100d0
-
-          Histo(33)%Info   = "mT_lp"
-          Histo(33)%NBins  = 40
-          Histo(33)%BinSize= 25d0*GeV
-          Histo(33)%LowVal =  0d0*GeV
-          Histo(33)%SetScale= 100d0
 
 
 ELSEIF( ObsSet.EQ.31 ) THEN! set of observables for HTHTbar + A0 production
@@ -9706,9 +9689,9 @@ elseif( ObsSet.eq.29) then! ttb+photon production without top decays at Tevatron
     NBin(18) = WhichBin(18,R_Pj(3)) 
     NBin(19) = WhichBin(19,R_Pj(4)) 
     NBin(20) = WhichBin(20,R_Pj(5)) 
-    NBin(21) = WhichBin(21,R_lj(1)) 
-    NBin(22) = WhichBin(22,R_lj(2)) 
-    NBin(23) = WhichBin(23,R_lj(3)) 
+    NBin(21) = WhichBin(21,m_jjb)
+    NBin(22) = WhichBin(22,mTblP)
+    NBin(23) = WhichBin(23,mT_lp)
     NBin(24) = WhichBin(24,R_lj(4)) 
     NBin(25) = WhichBin(25,R_lj(5)) 
     NBin(26) = WhichBin(26,R_PlepM)  !??
@@ -9716,9 +9699,6 @@ elseif( ObsSet.eq.29) then! ttb+photon production without top decays at Tevatron
     NBin(28) = WhichBin(28,m_leppho)  
     NBin(29) = WhichBin(29,Phi_LP)  
     NBin(30) = WhichBin(30,m_jj)
-    NBin(31) = WhichBin(31,m_jjb)
-    NBin(32) = WhichBin(32,mTblP)
-    NBin(33) = WhichBin(33,mT_lp)
     
     
     if( present(PObs) ) then
@@ -9742,9 +9722,9 @@ elseif( ObsSet.eq.29) then! ttb+photon production without top decays at Tevatron
        PObs(18) = R_Pj(3) 
        PObs(19) = R_Pj(4) 
        PObs(20) = R_Pj(5) 
-       PObs(21) = R_lj(1) 
-       PObs(22) = R_lj(2) 
-       PObs(23) = R_lj(3) 
+       PObs(21) = m_jjb
+       PObs(22) = mTblP
+       PObs(23) = mT_lp
        PObs(24) = R_lj(4) 
        PObs(25) = R_lj(5) 
        PObs(26) = R_PlepM 
