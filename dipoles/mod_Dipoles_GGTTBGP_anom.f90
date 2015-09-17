@@ -11,7 +11,7 @@
 
       public :: EvalDipoles_GGTTBGP_anom
       integer, parameter, private   :: dp = selected_real_kind(15)
-      real(dp), private :: yRnDK(1:10), Wgt_ext
+      real(dp), private :: yRnDK(1:8), Wgt_ext
 
       logical, parameter, private  :: invert_alphaCut = .false.
       real(dp), parameter, private  :: MomZero(1:4)=0d0
@@ -19,14 +19,14 @@
       contains
 
 !  we have a list of dipoles that we need to go through
-!  We label things as 0-> bar t(p1)+ Z(2) + t(3) + g(p4)+g(p5)+g(p6)
+!  We label things as 0-> bar t(p1)+ gamma(2) + t(3) + g(p4)+g(p5)+g(p6)
 !  and we  assume that gluons in the initial state have momenta p4 and p5,
 
 
       subroutine EvalDipoles_GGTTBGP_anom(p,yRnDk1,Wgt,sum_dip)
       real(dp), intent(out) ::  sum_dip
       real(dp), intent(in) :: p(4,6)
-      real(dp), intent(in) :: yRnDK1(1:10), Wgt
+      real(dp), intent(in) :: yRnDK1(1:8), Wgt
       integer, parameter :: ndip = 12
       integer, parameter :: in1 = 4
       integer, parameter :: in2 = 5
@@ -56,7 +56,7 @@
 
         fl =    'gl'
         fl(1) = 'qm'
-        fl(2) = 'gm'  ! gm is the z boson
+        fl(2) = 'gm'  ! gm is the photon
         fl(3) = 'qm'
 
 
@@ -74,7 +74,6 @@
          k=dip(n,3)  ! spectator
 
          res = zero
-
       if (j.ne.in1.and.j.ne.in2.and.k.ne.in1.and.k.ne.in2) then
         call dipff(n,i,j,k,mass(i),mass(j),mass(k),fl(i),fl(j),p,res)
       endif
@@ -82,7 +81,6 @@
       if ((j.ne.in1.and.j.ne.in2).and.(k.eq.in1.or.k.eq.in2)) then
         call dipfi(n,i,j,k,mass(i),mass(j),mass(k),fl(i),fl(j),p,res)
       endif
-
 
       if ( (k.ne.in1.and.k.ne.in2).and.(j.eq.in1.or.j.eq.in2)) then
         call dipif(n,i,j,k,mass(i),mass(j),mass(k),fl(i),fl(j),p,res)
@@ -137,8 +135,8 @@
        real(dp) ::  pjetout(4,5), weight
        logical :: Not_Passed_Cuts
        integer :: NBin(1:NumHistograms)
-       real(dp) :: MomDK(1:4,1:8),PSWgt1,PSWgt2,PSWgt3,PObs(1:NumHistograms)
-       integer :: Njet, Nmax(5), Nhisto,N2jump
+       real(dp) :: MomDK(1:4,1:6),PSWgt1,PSWgt2,PObs(1:NumHistograms)
+       integer :: Njet, Nmax(5), Nhisto
        logical, save :: first_time = .true.
        complex(8) :: The2ndResult(1:2), PolExt1(1:4)
 
@@ -223,7 +221,7 @@
           q(:,1) = p(:,1)
           fl(1) = 'qm'
           q(:,2) = p(:,2)
-          fl(2) = 'gm'   ! z boson
+          fl(2) = 'gm'   ! photon
           q(:,3) = p(:,3)
           fl(3) = 'qm'
           q(:,4) = p(:,4)
@@ -256,16 +254,11 @@
           pause
        endif
 
-       IF( ZDECAYS.NE.0 ) THEN
-          call EvalPhasespace_ZDecay(q(1:4,2),yRnDk(9:10),MomDK(1:4,7:8),PSWgt3)
-          PSWgt1 = PSWgt1 * PSWgt3
-       ENDIF
-
 
 !----------------- ini   ini     final   top   top, real
 
 
-  call Kinematics_TTBARZ(0,(/-q(1:4,4),-q(1:4,5),q(1:4,2),q(1:4,1),q(1:4,3), Momzero,MomDK(1:4,1:8)/), (/4,5,3,1,2,0,7,8,9,10,11,12,13,14/), Not_Passed_Cuts,NBin(1:NumHistograms),PObs)
+  call Kinematics_TTBARPHOTON(0,(/-q(1:4,4),-q(1:4,5),q(1:4,2),q(1:4,1),q(1:4,3), Momzero,MomDK(1:4,1:6)/), (/4,5,3,1,2,6,7,8,9,10,11,12/), Not_Passed_Cuts,NBin(1:NumHistograms),PObs)
 
      if(Not_Passed_Cuts.eq..false.) then
 
@@ -282,10 +275,10 @@
                   Nmax(1) = 1
               endif
         endif
-        N2Jump = 1
-        if (ZDecays.ge.1) then ! Z decays
-            N2jump=2
-        endif
+!RR        N2Jump = 1
+!RR        if (ZDecays.ge.1) then ! Z decays
+!RR            N2jump=2
+!RR        endif
 !         if( TTBZ_SpeedUp ) then
 !           Nmax(2) = -1
 !         endif
@@ -304,7 +297,7 @@
 
 
        do i1=-1,Nmax(1),2
-         do i2 = -1,Nmax(2),N2Jump! Z boson
+         do i2 = -1,Nmax(2),2
            do i3 = -1,Nmax(3),2
              do i4 = -1,Nmax(4),2
                do i5 = -1,Nmax(5),2
@@ -342,14 +335,16 @@
            endif
 
    if( TTBZ_SpeedUp .and. hel(4).eq.-1 ) cycle
-   call SetPolarization((/q(1:4,1),q(1:4,3),q(1:4,4),q(1:4,5),q(1:4,2)/),momDK(1:4,1:8),(/hel(1),hel(3),hel(4),hel(5),hel(2)/),ExtParticles(1:5),PolExt1(1:4))
+!   call SetPolarization((/q(1:4,1),q(1:4,3),q(1:4,4),q(1:4,5),q(1:4,2)/),momDK(1:4,1:8),(/hel(1),hel(3),hel(4),hel(5),hel(2)/),ExtParticles(1:5),PolExt1(1:4))
+   call GenerateEvent52((/q(1:4,1),q(1:4,3),q(1:4,4),q(1:4,5),q(1:4,2)/), &
+        momDK(1:4,1:6),(/hel(1),hel(3),hel(4),hel(5),hel(2)/),ExtParticles(1:5))
 
    if (pos.eq.1) then
    if (i1.eq.-1.or.i1.eq.1) POL1(i1,:)= TreeAmpsDip(1)%quarks(1)%pol(1:4)
    endif
 
-   if (pos.eq.2) then    ! Z boson
-      print *, 'error, pos = 2, z boson'
+   if (pos.eq.2) then    ! photons
+      print *, 'error, pos = 2, photon'
       stop
    endif
 
@@ -395,7 +390,7 @@
 
        Am(i1,j1,c1,c2) = (0.0_dp,0.0_dp)
 
-      do i2=-1,1,N2jump!  Z boson
+      do i2=-1,1,2
       do i3=-1,1,2
       do i4=-1,1,2
       do i5=-1,1,2
@@ -518,8 +513,8 @@
        integer :: Njet
        logical, save :: first_time = .true.
        logical :: Not_Passed_Cuts
-       integer :: NBin(1:NumHistograms), Nmax(5), Nhisto, n2jump
-       real(dp) :: MomDK(1:4,1:8),PSWgt1,PSWgt2,PSWgt3,PObs(1:NumHistograms)
+       integer :: NBin(1:NumHistograms), Nmax(5), Nhisto 
+       real(dp) :: MomDK(1:4,1:6),PSWgt1,PSWgt2,PObs(1:NumHistograms)
        complex(8) :: The2ndResult(1:2), PolExt1(1:4)
 
        res = zero
@@ -578,7 +573,7 @@
         endif
 
           fl(1) = 'qm'
-          fl(2) = 'gm'   ! z boson
+          fl(2) = 'gm'   ! photon
           fl(3) = 'qm'
           fl(4) = 'gl'
           fl(5) = 'gl'
@@ -615,16 +610,11 @@
           pause
        endif
 
-       IF( ZDECAYS.NE.0 ) THEN
-          call EvalPhasespace_ZDecay(q(1:4,2),yRnDk(9:10),MomDK(1:4,7:8),PSWgt3)
-          PSWgt1 = PSWgt1 * PSWgt3
-       ENDIF
-
 
 !-----------------     initial   initial       final  top      top
 
 
-  call Kinematics_TTBARZ(0,(/-q(1:4,4),-q(1:4,5),q(1:4,2),q(1:4,1),q(1:4,3), Momzero,MomDK(1:4,1:8)/), (/4,5,3,1,2,0,7,8,9,10,11,12,13,14/), Not_Passed_Cuts,NBin(1:NumHistograms),PObs)
+  call Kinematics_TTBARPHOTON(0,(/-q(1:4,4),-q(1:4,5),q(1:4,2),q(1:4,1),q(1:4,3), Momzero,MomDK(1:4,1:6)/), (/4,5,3,1,2,6,7,8,9,10,11,12/), Not_Passed_Cuts,NBin(1:NumHistograms),PObs)
 
      if(Not_Passed_Cuts.eq..false.) then
 
@@ -640,18 +630,11 @@
                Nmax(1) = 1
        endif
        endif
-        N2Jump = 1
-        if (ZDecays.ge.1) then ! Z decays
-            N2jump=2
-        endif
-!         if( TTBZ_SpeedUp ) then
-!           Nmax(2) = -1
-!         endif
 
 !--- after momentum mapping -- sum over colors and polarizations
 
        do i1=-1,Nmax(1),2
-          do i2 = -1,Nmax(2),N2Jump! Z boson
+          do i2 = -1,Nmax(2),2
              do i3 = -1,Nmax(3),2
                do i4 = -1,Nmax(4),2
                  do i5=-1,Nmax(5),2
@@ -687,14 +670,17 @@
            endif
 
    if( TTBZ_SpeedUp .and. hel(4).eq.-1 ) cycle
-   call SetPolarization((/q(1:4,1),q(1:4,3),q(1:4,4),q(1:4,5),q(1:4,2)/),momDK(1:4,1:8),(/hel(1),hel(3),hel(4),hel(5),hel(2)/),ExtParticles(1:5),PolExt1(1:4))
+!   call SetPolarization((/q(1:4,1),q(1:4,3),q(1:4,4),q(1:4,5),q(1:4,2)/),momDK(1:4,1:8),(/hel(1),hel(3),hel(4),hel(5),hel(2)/),ExtParticles(1:5),PolExt1(1:4))
+ call GenerateEvent52((/q(1:4,1),q(1:4,3),q(1:4,4),q(1:4,5),q(1:4,2)/), &
+  momDK(1:4,1:6),(/hel(1),hel(3),hel(4),hel(5),hel(2)/),ExtParticles(1:5))
+
 
    if (pos.eq.1) then
    if (i1.eq.-1.or.i1.eq.1) POL1(i1,:)= TreeAmpsDip(1)%quarks(1)%pol(1:4)
    endif
 
-   if (pos.eq.2) then    ! Z boson
-      print *, 'error, pos = 2, z boson'
+   if (pos.eq.2) then    ! photons
+      print *, 'error, pos = 2, photon'
       stop
    endif
 
@@ -739,7 +725,7 @@
 
        Am(i1,j1,c1,c2) = (0.0_dp,0.0_dp)
 
-      do i2=-1,1,N2jump!  Z boson
+      do i2=-1,1,2
       do i3=-1,1,2
       do i4=-1,1,2
       do i5=-1,1,2
@@ -860,8 +846,8 @@
        integer :: Njet
        logical, save :: first_time = .true.
        logical :: Not_Passed_Cuts
-       integer :: NBin(1:NumHistograms), Nmax(5), Nhisto,N2jump
-       real(dp) :: MomDK(1:4,1:8),PSWgt1,PSWgt2,PSWgt3,PObs(1:NumHistograms)
+       integer :: NBin(1:NumHistograms), Nmax(5), Nhisto
+       real(dp) :: MomDK(1:4,1:6),PSWgt1,PSWgt2,PObs(1:NumHistograms)
        complex(8) :: The2ndResult(1:2), PolExt1(1:4)
 
 
@@ -923,7 +909,7 @@
 
 
           fl(1) = 'qm'
-          fl(2) = 'gm'!   z boson
+          fl(2) = 'gm'
           fl(3) = 'qm'
           fl(4) = 'gl'
           fl(5) = 'gl'
@@ -959,18 +945,9 @@
           pause
        endif
 
-       IF( ZDECAYS.NE.0 ) THEN
-          call EvalPhasespace_ZDecay(q(1:4,2),yRnDk(9:10),MomDK(1:4,7:8),PSWgt3)
-          PSWgt1 = PSWgt1 * PSWgt3
-       ENDIF
+!----------------- initial   initial        final top      top
 
-
-
-!----------------- initial   initial        final bartop      top
-
-  call Kinematics_TTBARZ(0,(/-q(1:4,4),-q(1:4,5),q(1:4,2),q(1:4,1),q(1:4,3), Momzero,MomDK(1:4,1:8)/), (/4,5,3,1,2,0,7,8,9,10,11,12,13,14/), Not_Passed_Cuts,NBin(1:NumHistograms),PObs)
-
-
+  call Kinematics_TTBARPHOTON(0,(/-q(1:4,4),-q(1:4,5),q(1:4,2),q(1:4,1),q(1:4,3), Momzero,MomDK(1:4,1:6)/), (/4,5,3,1,2,6,7,8,9,10,11,12/), Not_Passed_Cuts,NBin(1:NumHistograms),PObs)
 
      if(Not_Passed_Cuts.eq..false.) then
 
@@ -988,10 +965,7 @@
                Nmax(1) = 1
              endif
        endif
-        N2Jump = 1
-        if (ZDecays.ge.1) then ! Z decays
-            N2jump=2
-        endif
+
 !         if( TTBZ_SpeedUp ) then
 !           Nmax(2) = -1
 !         endif
@@ -1010,7 +984,7 @@
 ! print *, "mom check5",TreeAmpsDip(1)%boson%Mom(1:4)
 
        do i1 = -1,Nmax(1),2
-          do i2 = -1,Nmax(2),N2jump! Zboson
+          do i2 = -1,Nmax(2),2
              do i3 = -1,Nmax(3),2
                 do i4 = -1,Nmax(4),2
                    do i5 = -1,Nmax(5),2
@@ -1049,15 +1023,18 @@
            endif
 
    if( TTBZ_SpeedUp .and. hel(4).eq.-1 ) cycle
-   call SetPolarization((/q(1:4,1),q(1:4,3),q(1:4,4),q(1:4,5),q(1:4,2)/),momDK(1:4,1:8),(/hel(1),hel(3),hel(4),hel(5),hel(2)/),ExtParticles(1:5),PolExt1(1:4))
+!   call SetPolarization((/q(1:4,1),q(1:4,3),q(1:4,4),q(1:4,5),q(1:4,2)/),momDK(1:4,1:8),(/hel(1),hel(3),hel(4),hel(5),hel(2)/),ExtParticles(1:5),PolExt1(1:4))
+ call GenerateEvent52((/q(1:4,1),q(1:4,3),q(1:4,4),q(1:4,5),q(1:4,2)/), &
+  momDK(1:4,1:6),(/hel(1),hel(3),hel(4),hel(5),hel(2)/),ExtParticles(1:5))
+
 
 
    if (pos.eq.1) then
    if (i1.eq.-1.or.i1.eq.1) POL1(i1,:)= TreeAmpsDip(1)%quarks(1)%pol(1:4)
    endif
 
-   if (pos.eq.2) then    ! Z boson
-      print *, 'error, pos = 2, Z boson'
+   if (pos.eq.2) then    ! photons
+      print *, 'error, pos = 2, photon'
       stop
    endif
 
@@ -1108,7 +1085,7 @@
 
        Am(i1,j1,c1,c2) = (0.0_dp,0.0_dp)
 
-      do i2=-1,1,N2jump!  Z boson
+      do i2=-1,1,2
       do i3=-1,1,2
       do i4=-1,1,2
       do i5=-1,1,2
@@ -1216,8 +1193,8 @@
        integer :: Njet
        logical, save :: first_time = .true.
        logical :: Not_Passed_Cuts
-       integer :: NBin(1:NumHistograms), Nmax(5), Nhisto,N2jump
-       real(dp) :: MomDK(1:4,1:8),PSWgt1,PSWgt2,PSWgt3,PObs(1:NumHistograms)
+       integer :: NBin(1:NumHistograms), Nmax(5), Nhisto
+       real(dp) :: MomDK(1:4,1:6),PSWgt1,PSWgt2,PObs(1:NumHistograms)
        complex(8) :: The2ndResult(1:2), PolExt1(1:4)
 
 
@@ -1266,7 +1243,7 @@
         endif
 
           fl(1) = 'qm'
-          fl(2) = 'gm'!   z boson
+          fl(2) = 'gm'
           fl(3) = 'qm'
           fl(4) = 'gl'
           fl(5) = 'gl'
@@ -1312,15 +1289,10 @@
           pause
        endif
 
-       IF( ZDECAYS.NE.0 ) THEN
-          call EvalPhasespace_ZDecay(q(1:4,2),yRnDk(9:10),MomDK(1:4,7:8),PSWgt3)
-          PSWgt1 = PSWgt1 * PSWgt3
-       ENDIF
-
 !-----------------     initial   initial       final  top      top
 
 
-  call Kinematics_TTBARZ(0,(/-q(1:4,4),-q(1:4,5),q(1:4,2),q(1:4,1),q(1:4,3), Momzero,MomDK(1:4,1:8)/), (/4,5,3,1,2,0,7,8,9,10,11,12,13,14/), Not_Passed_Cuts,NBin(1:NumHistograms),PObs)
+  call Kinematics_TTBARPHOTON(0,(/-q(1:4,4),-q(1:4,5),q(1:4,2),q(1:4,1),q(1:4,3), Momzero,MomDK(1:4,1:6)/), (/4,5,3,1,2,6,7,8,9,10,11,12/), Not_Passed_Cuts,NBin(1:NumHistograms),PObs)
 
 
      if(Not_Passed_Cuts.eq..false.) then
@@ -1339,10 +1311,7 @@
        endif
        endif
 
-        N2Jump = 1
-        if (ZDecays.ge.1) then ! Z decays
-            N2jump=2
-        endif
+
 !         if( TTBZ_SpeedUp ) then
 !           Nmax(2) = -1
 !         endif
@@ -1364,7 +1333,7 @@
 
 
        do i1=-1,Nmax(1),2
-          do i2 = -1,Nmax(2),N2jump!  Z boson
+          do i2 = -1,Nmax(2),2
              do i3 = -1,Nmax(3),2
                 do i4 = -1,Nmax(4),2
                      do i5=-1,Nmax(5),2
@@ -1401,7 +1370,10 @@
            endif
 
    if( TTBZ_SpeedUp .and. hel(4).eq.-1 ) cycle
-   call SetPolarization((/q(1:4,1),q(1:4,3),q(1:4,4),q(1:4,5),q(1:4,2)/),momDK(1:4,1:8),(/hel(1),hel(3),hel(4),hel(5),hel(2)/),ExtParticles(1:5),PolExt1(1:4))
+!   call SetPolarization((/q(1:4,1),q(1:4,3),q(1:4,4),q(1:4,5),q(1:4,2)/),momDK(1:4,1:8),(/hel(1),hel(3),hel(4),hel(5),hel(2)/),ExtParticles(1:5),PolExt1(1:4))
+
+  call GenerateEvent52((/q(1:4,1),q(1:4,3),q(1:4,4),q(1:4,5),q(1:4,2)/), &
+  momDK(1:4,1:6),(/hel(1),hel(3),hel(4),hel(5),hel(2)/),ExtParticles(1:5))
 
 
 ! print *, "pol check1",TreeAmpsDip(1)%quarks(1)%Pol(1:4)
@@ -1413,8 +1385,8 @@
    if (i1.eq.-1.or.i1.eq.1) POL1(i1,:)= TreeAmpsDip(1)%quarks(1)%pol(1:4)
    endif
 
-   if (pos.eq.2) then    ! z boson
-      print *, 'error, pos = 2, z boson'
+   if (pos.eq.2) then    ! photons
+      print *, 'error, pos = 2, photon'
       stop
    endif
 
@@ -1460,7 +1432,7 @@
 
        Am(i1,j1,c1,c2) = (0.0_dp,0.0_dp)
 
-      do i2=-1,1,N2jump!  Z boson
+      do i2=-1,1,2
       do i3=-1,1,2
       do i4=-1,1,2
       do i5=-1,1,2
@@ -1639,9 +1611,9 @@ type(Particle) :: ExtParticles(:)
   ExtParticles(4)%Mass = 0d0
   ExtParticles(4)%Mass2= 0d0
 
-  ExtParticles(5)%PartType = Z0_
+  ExtParticles(5)%PartType = Pho_
   ExtParticles(5)%ExtRef   = 5
-  ExtParticles(5)%Mass = m_Z
+  ExtParticles(5)%Mass = 0d0
   ExtParticles(5)%Mass2= ExtParticles(5)%Mass**2
 
 
@@ -1650,48 +1622,48 @@ END SUBROUTINE InitProcess_TbTGGP_anom
 
 
 
-SUBROUTINE SetPolarization(Mom,MomDK,Hel,ExtParticles,SecondPol)
-use ModMisc
-use ModProcess
-use ModTopDecay
-use ModZDecay
-implicit none
-type(Particle) :: ExtParticles(1:5)
-real(8) :: Mom(1:4,1:5),MomDK(1:4,1:8)
-integer :: Hel(1:5)
-complex(8),optional :: SecondPol(1:4)
-
-     ExtParticles(1)%Mom(1:4) = dcmplx(Mom(1:4,1))   ! HERE WAS A BUG: this was inside the (TopDecays.ge.1) condition
-     ExtParticles(2)%Mom(1:4) = dcmplx(Mom(1:4,2))
-     if (TopDecays.ge.1) then
-        call TopDecay(ExtParticles(1),DK_LO,MomDK(1:4,1:3))
-        call TopDecay(ExtParticles(2),DK_LO,MomDK(1:4,4:6))
-     else
-        call vSpi(ExtParticles(1)%Mom(1:4),ExtParticles(1)%Mass,Hel(1),ExtParticles(1)%Pol(1:4))
-        call ubarSpi(ExtParticles(2)%Mom(1:4),ExtParticles(2)%Mass,Hel(2),ExtParticles(2)%Pol(1:4))
-    endif
-
-
-     ExtParticles(5)%Mom(1:4) = dcmplx(Mom(1:4,5))
-     ExtParticles(5)%Helicity = Hel(5)
-     if (ZDecays.ge.1) then
-          call ZDecay(ExtParticles(5),DK_LO,MomDK(1:4,7:8))
-     else
-          call pol_massSR(ExtParticles(5)%Mom(1:4),ExtParticles(5)%Mass,ExtParticles(5)%Helicity,ExtParticles(5)%Pol(1:4))
-    endif
-
-    ExtParticles(3)%Mom(1:4) = dcmplx(Mom(1:4,3))
-    call pol_mless(ExtParticles(3)%Mom(1:4),Hel(3),ExtParticles(3)%Pol(1:4))
-    if( present(SecondPol) ) call pol_mless(ExtParticles(3)%Mom(1:4),-Hel(3),SecondPol(1:4))
-
-    ExtParticles(4)%Mom(1:4) = dcmplx(Mom(1:4,4))
-    call pol_mless(ExtParticles(4)%Mom(1:4),Hel(4),ExtParticles(4)%Pol(1:4))
-
-
-! ExtParticles(3)%Pol(1:4)=ExtParticles(3)%Mom(1:4); print *, "check gauge inv. in dipoles"
-
-RETURN
-END SUBROUTINE
+!RR SUBROUTINE SetPolarization(Mom,MomDK,Hel,ExtParticles,SecondPol)
+!RR use ModMisc
+!RR use ModProcess
+!RR use ModTopDecay
+!RR use ModZDecay
+!RR implicit none
+!RR type(Particle) :: ExtParticles(1:5)
+!RR real(8) :: Mom(1:4,1:5),MomDK(1:4,1:8)
+!RR integer :: Hel(1:5)
+!RR complex(8),optional :: SecondPol(1:4)
+!RR 
+!RR      ExtParticles(1)%Mom(1:4) = dcmplx(Mom(1:4,1))   ! HERE WAS A BUG: this was inside the (TopDecays.ge.1) condition
+!RR      ExtParticles(2)%Mom(1:4) = dcmplx(Mom(1:4,2))
+!RR      if (TopDecays.ge.1) then
+!RR         call TopDecay(ExtParticles(1),DK_LO,MomDK(1:4,1:3))
+!RR         call TopDecay(ExtParticles(2),DK_LO,MomDK(1:4,4:6))
+!RR      else
+!RR         call vSpi(ExtParticles(1)%Mom(1:4),ExtParticles(1)%Mass,Hel(1),ExtParticles(1)%Pol(1:4))
+!RR         call ubarSpi(ExtParticles(2)%Mom(1:4),ExtParticles(2)%Mass,Hel(2),ExtParticles(2)%Pol(1:4))
+!RR     endif
+!RR 
+!RR 
+!RR      ExtParticles(5)%Mom(1:4) = dcmplx(Mom(1:4,5))
+!RR      ExtParticles(5)%Helicity = Hel(5)
+!RR      if (ZDecays.ge.1) then
+!RR           call ZDecay(ExtParticles(5),DK_LO,MomDK(1:4,7:8))
+!RR      else
+!RR           call pol_massSR(ExtParticles(5)%Mom(1:4),ExtParticles(5)%Mass,ExtParticles(5)%Helicity,ExtParticles(5)%Pol(1:4))
+!RR     endif
+!RR 
+!RR     ExtParticles(3)%Mom(1:4) = dcmplx(Mom(1:4,3))
+!RR     call pol_mless(ExtParticles(3)%Mom(1:4),Hel(3),ExtParticles(3)%Pol(1:4))
+!RR     if( present(SecondPol) ) call pol_mless(ExtParticles(3)%Mom(1:4),-Hel(3),SecondPol(1:4))
+!RR 
+!RR     ExtParticles(4)%Mom(1:4) = dcmplx(Mom(1:4,4))
+!RR     call pol_mless(ExtParticles(4)%Mom(1:4),Hel(4),ExtParticles(4)%Pol(1:4))
+!RR 
+!RR 
+!RR ! ExtParticles(3)%Pol(1:4)=ExtParticles(3)%Mom(1:4); print *, "check gauge inv. in dipoles"
+!RR 
+!RR RETURN
+!RR END SUBROUTINE
 
 
 

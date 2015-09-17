@@ -5,7 +5,7 @@ implicit none
 !! important convention for 1-loop amplitudes:
 !! external quarks need to be Str/AStr or Top/ATop
 !! massive quarks (i.e. tops) in closed fermion loops are Bot
-!! massless quarks in closed fermion loops are Chm
+!! massless quarks in closed fermion lfoops are Chm
 
 
 type :: Particle
@@ -2655,7 +2655,7 @@ ELSEIF( PROCESS.EQ.76 ) THEN !   3_Str  + 4_AStr --> 5_Glu  + 1_ATop + 2_Top + 6
   ENDIF
 
 
-ELSEIF( PROCESS.EQ.81 ) THEN !   3_Glu  + 4_Glu  --> 1_ATop + 2_Top + 5_Pho ! ttbPhoton
+ELSEIF( PROCESS.EQ.81 ) THEN !   3_Glu  + 4_Glu  --> 1_ATop + 2_Top + 5_Pho ! ttbPhoton (in production)
   IF( CORRECTION.EQ.0 ) THEN
       NumExtParticles = 5
       allocate(Crossing(1:NumExtParticles))
@@ -2678,12 +2678,36 @@ ELSEIF( PROCESS.EQ.81 ) THEN !   3_Glu  + 4_Glu  --> 1_ATop + 2_Top + 5_Pho ! tt
       NDim = NDim + 2    ! shat integration
       VegasNc0_default = 100000
       VegasNc1_default = 100000
+! copied from ttbZ
+  ELSEIF( CORRECTION.EQ.4 ) THEN
+      NumExtParticles = 5
+      allocate(Crossing(1:NumExtParticles))
+      allocate(ExtParticle(1:NumExtParticles))
+      Crossing(:) = (/4,5,-1,-2,3/)
+      MasterProcess=17
+      AvgFactor = SpinAvg * GluonColAvg**2
+      NDim = NDim + 5    ! t tbar photon PS integration
+      NDim = NDim + 2    ! shat integration
+      VegasNc0_default = 100000
+      VegasNc1_default = 100000
+  ELSEIF( CORRECTION.EQ.5 ) THEN
+      NumExtParticles = 5
+      allocate(Crossing(1:NumExtParticles))
+      allocate(ExtParticle(1:NumExtParticles))
+      Crossing(:) = (/4,5,-1,-2,3/)
+      MasterProcess=17
+      AvgFactor = SpinAvg * GluonColAvg**2
+      NDim = NDim + 5    ! t tbar photon PS integration
+      NDim = NDim + 2    ! shat integration
+      NDim = NDim + 3  ! additional gluons in the top decay
+      VegasNc0_default = 1000000
+      VegasNc1_default = 1000000
   ELSE
       call Error("Correction to this process is not available")
   ENDIF
 
 
-ELSEIF( PROCESS.EQ.82 ) THEN !   3_Glu  + 4_Glu  --> 1_ATop + 2_Top + 5_Pho ! ttbPhoton
+ELSEIF( PROCESS.EQ.82 ) THEN !   3_Str  + 4_Str  --> 1_ATop + 2_Top + 5_Pho ! ttbPhoton (in production)
   IF( CORRECTION.EQ.0 ) THEN
       NumExtParticles = 5
       allocate(Crossing(1:NumExtParticles))
@@ -2706,12 +2730,125 @@ ELSEIF( PROCESS.EQ.82 ) THEN !   3_Glu  + 4_Glu  --> 1_ATop + 2_Top + 5_Pho ! tt
       NDim = NDim + 2    ! shat integration
       VegasNc0_default = 100000
       VegasNc1_default = 100000
+! copied from ttbZ
+ ELSEIF( CORRECTION.EQ.4 ) THEN
+      NumExtParticles = 5
+      allocate(Crossing(1:NumExtParticles))
+      allocate(ExtParticle(1:NumExtParticles))
+      Crossing(:) = (/4,5,-1,-2,3/)
+      MasterProcess=18
+      AvgFactor = SpinAvg * QuarkColAvg**2
+      NDim = NDim + 5    ! PS integration
+      NDim = NDim + 2    ! shat integration
+      VegasNc0_default = 1000000
+      VegasNc1_default = 1000000
+  ELSEIF( CORRECTION.EQ.5 ) THEN
+      NumExtParticles = 5
+      allocate(Crossing(1:NumExtParticles))
+      allocate(ExtParticle(1:NumExtParticles))
+      Crossing(:) = (/4,5,-1,-2,3/)
+      MasterProcess=18
+      AvgFactor = SpinAvg * QuarkColAvg**2
+      NDim = NDim + 5    !  PS integration
+      NDim = NDim + 2    ! shat integration
+      NDim = NDim + 3  ! additional gluons in the top decay
+      VegasNc0_default = 1000000
+      VegasNc1_default = 1000000
+  ELSE
+      call Error("Correction to this process is not available")
+  ENDIF
+
+! below all copied from ttbZ
+  ELSEIF( PROCESS.EQ.83 ) THEN !   3_Str  + 5_Glu  --> 4_Str  + 1_ATop + 2_Top + 6_Pho (in production)
+  IF( CORRECTION.EQ.2 ) THEN
+      NumExtParticles = 6
+      allocate(Crossing(1:NumExtParticles))
+      allocate(ExtParticle(1:NumExtParticles))
+      Crossing(:) = (/5,6,-1,3,-2,4/)
+      MasterProcess=20
+      AvgFactor = SpinAvg * QuarkColAvg * GluonColAvg
+      NDim = NDim + 8    ! t tbar glu PS integration
+      NDim = NDim + 2    ! shat integration
+      VegasNc0_default = 10000000
+      VegasNc1_default = 10000000
+  ELSEIF( CORRECTION.EQ.3 ) THEN
+      NumExtParticles = 5
+      allocate(Crossing(1:NumExtParticles))
+      allocate(ExtParticle(1:NumExtParticles))
+      Crossing(:) = (/4,5,-1,-2,3/)
+      MasterProcess=18
+      AvgFactor = SpinAvg * QuarkColAvg * GluonColAvg
+      NDim = NDim + 5    ! t tbar photon PS integration
+      NDim = NDim + 2    ! shat integration
+      NDim = NDim + 1    ! x integration
+      VegasNc0_default = 1000000
+      VegasNc1_default = 1000000
   ELSE
       call Error("Correction to this process is not available")
   ENDIF
 
 
-ELSEIF( PROCESS.EQ.86 ) THEN !   3_Str  + 4_AStr --> 5_Glu  + 1_ATop + 2_Top + 6_Pho
+
+ELSEIF( PROCESS.EQ.84 ) THEN !   4_AStr + 5_Glu  --> 3_AStr + 1_ATop + 2_Top + 6_Pho (in production)
+  IF( CORRECTION.EQ.2 ) THEN
+      NumExtParticles = 6
+      allocate(Crossing(1:NumExtParticles))
+      allocate(ExtParticle(1:NumExtParticles))
+      Crossing(:) = (/5,6,3,-1,-2,4/)
+      MasterProcess=20
+      AvgFactor = SpinAvg * QuarkColAvg * GluonColAvg
+      NDim = NDim + 8    ! t tbar glu photon PS integration
+      NDim = NDim + 2    ! shat integration
+      VegasNc0_default = 10000000
+      VegasNc1_default = 10000000
+  ELSEIF( CORRECTION.EQ.3 ) THEN
+      NumExtParticles = 5
+      allocate(Crossing(1:NumExtParticles))
+      allocate(ExtParticle(1:NumExtParticles))
+      Crossing(:) = (/4,5,-1,-2,3/)
+      MasterProcess=18
+      AvgFactor = SpinAvg * QuarkColAvg * GluonColAvg
+      NDim = NDim + 5    ! t tbar photon PS integration
+      NDim = NDim + 2    ! shat integration
+      NDim = NDim + 1    ! x integration
+      VegasNc0_default = 100000
+      VegasNc1_default = 100000
+  ELSE
+      call Error("Correction to this process is not available")
+  ENDIF
+
+
+ELSEIF( PROCESS.EQ.85 ) THEN !   3_Glu  + 4_Glu  --> 5_Glu  + 1_ATop + 2_Top + 6_Pho (in production)
+  IF( CORRECTION.EQ.2 ) THEN
+      NumExtParticles = 6
+      allocate(Crossing(1:NumExtParticles))
+      allocate(ExtParticle(1:NumExtParticles))
+      Crossing(:) = (/5,6,-1,-2,3,4/)
+      MasterProcess=19
+      AvgFactor = SpinAvg * GluonColAvg**2
+      NDim = NDim + 8    ! t tbar glu photon PS integration
+      NDim = NDim + 2    ! shat integration
+      VegasNc0_default = 10000000
+      VegasNc1_default = 10000000
+  ELSEIF( CORRECTION.EQ.3 ) THEN
+      NumExtParticles = 5
+      allocate(Crossing(1:NumExtParticles))
+      allocate(ExtParticle(1:NumExtParticles))
+      Crossing(:) = (/4,5,-1,-2,3/)
+      MasterProcess=17
+      AvgFactor = SpinAvg * GluonColAvg**2
+      NDim = NDim + 5    ! t tbar photon PS integration
+      NDim = NDim + 2    ! shat integration
+      NDim = NDim + 1    ! x integration
+      VegasNc0_default = 100000
+      VegasNc1_default = 100000
+  ELSE
+      call Error("Correction to this process is not available")
+  ENDIF
+
+
+
+ELSEIF( PROCESS.EQ.86 ) THEN !   3_Str  + 4_AStr --> 5_Glu  + 1_ATop + 2_Top + 6_Pho (in production)
   IF( CORRECTION.EQ.2 ) THEN
       NumExtParticles = 6
       allocate(Crossing(1:NumExtParticles))
@@ -2721,8 +2858,8 @@ ELSEIF( PROCESS.EQ.86 ) THEN !   3_Str  + 4_AStr --> 5_Glu  + 1_ATop + 2_Top + 6
       AvgFactor = SpinAvg * QuarkColAvg**2
       NDim = NDim + 8    ! t tbar glu photon PS integration
       NDim = NDim + 2    ! shat integration
-      VegasNc0_default = 1000000
-      VegasNc1_default = 1000000
+      VegasNc0_default = 10000000
+      VegasNc1_default = 10000000
   ELSEIF( CORRECTION.EQ.3 ) THEN
       NumExtParticles = 5
       allocate(Crossing(1:NumExtParticles))
@@ -4177,7 +4314,10 @@ ELSEIF( MASTERPROCESS.EQ.17 ) THEN
     ExtParticle(3)%PartType = Glu_
     ExtParticle(4)%PartType = Glu_
     ExtParticle(5)%PartType = Z0_
-    if( Process.ge.81 .and. Process.le.89 ) ExtParticle(5)%PartType = Pho_
+    if( Process.ge.81 .and. Process.le.89 ) then
+       ExtParticle(5)%PartType = Pho_
+       if (Zdecays .ne. -2) call Error("For ttb+photon (process 81-89), ZDecays must be -2")
+    endif
 
     IF( Correction.EQ.0 .OR. Correction.EQ.4 .OR.Correction.EQ.5 ) THEN
       NumPrimAmps = 2
@@ -4347,9 +4487,11 @@ ELSEIF( MASTERPROCESS.EQ.18 ) THEN
     ExtParticle(3)%PartType = AStr_
     ExtParticle(4)%PartType = Str_
     ExtParticle(5)%PartType = Z0_
-    if( Process.ge.81 .and. Process.le.89 ) ExtParticle(5)%PartType = Pho_
+    if( Process.ge.81 .and. Process.le.89 ) then
+       ExtParticle(5)%PartType = Pho_
+       if (Zdecays .ne. -2) call Error("For ttb+photon (process 81-89), ZDecays must be -2")
+    endif
 
-    if( Process.ge.81 .and. Process.le.89 ) ExtParticle(5)%PartType = Pho_
 
     IF( Correction.EQ.0 .OR. Correction.EQ.4 .OR.Correction.EQ.5) THEN
       NumPrimAmps = 2
@@ -4395,7 +4537,7 @@ ELSEIF( MASTERPROCESS.EQ.18 ) THEN
         Helicities(12,1:5)= (/0,0,-1,-1, 0/)! longitudinal polarization of massive V boson
      endif
     ELSE
-       if (ZDecays .gt. 0 ) then
+       if (ZDecays .gt. 0 .or. ZDecays .eq. -2) then
           NumHelicities = 16
           allocate(Helicities(1:NumHelicities,1:NumExtParticles))  ! extra for Z decay
           ! for now, use all helicities. might be able to use some clever tricks later though...
@@ -4498,7 +4640,10 @@ ELSEIF( MASTERPROCESS.EQ.19 ) THEN
     ExtParticle(4)%PartType = Glu_
     ExtParticle(5)%PartType = Glu_
     ExtParticle(6)%PartType = Z0_
-    if( Process.ge.81 .and. Process.le.89 ) ExtParticle(6)%PartType = Pho_
+    if( Process.ge.81 .and. Process.le.89 ) then
+       ExtParticle(6)%PartType = Pho_
+       if (Zdecays .ne. -2) call Error("For ttb+photon (process 81-89), ZDecays must be -2")
+    endif
 
     IF( Correction.EQ.2 ) THEN
       NumPrimAmps = 6
@@ -4544,6 +4689,22 @@ ELSEIF( MASTERPROCESS.EQ.19 ) THEN
       enddo
       enddo
       enddo
+    ELSEIF( TOPDECAYS.GE.1 .AND. ZDECAYS.EQ.-2 ) THEN
+       ! ttb+photon
+    NumHelicities = 16
+    allocate(Helicities(1:NumHelicities,1:NumExtParticles))
+      ih=1
+      do h3=-1,1,2! Z boson hel. Markus: rearranged for TTBZ_Speed=.true.
+      do h4=-1,1,2
+      do h5=-1,1,2
+      do h6=-1,1,2
+          if( ih.ge.17 ) cycle
+          Helicities(ih,1:6) = (/0,0,h6,h4,h5,h3/)
+          ih=ih+1
+      enddo
+      enddo
+      enddo
+      enddo
     ELSEIF( TOPDECAYS.EQ.0 .AND. ZDECAYS.EQ.0 ) then
     NumHelicities = 96
     allocate(Helicities(1:NumHelicities,1:NumExtParticles))
@@ -4555,6 +4716,26 @@ ELSEIF( MASTERPROCESS.EQ.19 ) THEN
       do h5=-1,1,2
       do h6=-1,1,1! Z boson hel
           if( ih.ge.97 ) cycle
+          Helicities(ih,1:6) = (/h1,h2,h3,h4,h5,h6/)
+          ih=ih+1
+      enddo
+      enddo
+      enddo
+      enddo
+      enddo
+      enddo
+    ELSEIF( TOPDECAYS.EQ.0 .AND. ZDECAYS.EQ.-2 ) then
+! ttb+photon
+    NumHelicities = 64
+    allocate(Helicities(1:NumHelicities,1:NumExtParticles))
+      ih=1
+      do h1=-1,1,2
+      do h2=-1,1,2
+      do h3=-1,1,2
+      do h4=-1,1,2
+      do h5=-1,1,2
+      do h6=-1,1,2! photon hel
+          if( ih.ge.65 ) cycle
           Helicities(ih,1:6) = (/h1,h2,h3,h4,h5,h6/)
           ih=ih+1
       enddo
@@ -4578,7 +4759,10 @@ ELSEIF( MASTERPROCESS.EQ.20 ) THEN
     ExtParticle(4)%PartType = Str_
     ExtParticle(5)%PartType = Glu_
     ExtParticle(6)%PartType = Z0_
-    if( Process.ge.81 .and. Process.le.89 ) ExtParticle(6)%PartType = Pho_
+    if( Process.ge.81 .and. Process.le.89 ) then 
+       ExtParticle(6)%PartType = Pho_
+       if (Zdecays .ne. -2) call Error("For ttb+photon (process 81-89), ZDecays must be -2")
+    endif
 
     IF( Correction.EQ.2 ) THEN
       NumPrimAmps = 8
@@ -4608,6 +4792,21 @@ ELSEIF( MASTERPROCESS.EQ.20 ) THEN
       enddo
       enddo
     ELSEIF( TOPDECAYS.GE.1 .AND. ZDECAYS.GE.1 ) THEN
+    NumHelicities = 16
+    allocate(Helicities(1:NumHelicities,1:NumExtParticles))
+      ih=1
+      do h3=-1,1,2! Z boson hel. Markus: rearranged for TTBZ_Speed=.true.
+      do h4=-1,1,2
+      do h5=-1,1,2
+      do h6=-1,1,2
+          if( ih.ge.17 ) cycle
+          Helicities(ih,1:6) = (/0,0,h6,h4,h5,h3/)
+          ih=ih+1
+      enddo
+      enddo
+      enddo
+      enddo
+    ELSEIF( TOPDECAYS.GE.1 .AND. ZDECAYS.EQ.-2 ) THEN
     NumHelicities = 16
     allocate(Helicities(1:NumHelicities,1:NumExtParticles))
       ih=1
