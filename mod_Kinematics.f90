@@ -9483,7 +9483,6 @@ elseif( ObsSet.eq.29) then! ttb+photon production without top decays at Tevatron
     NBin(8) = WhichBin(8,eta_Top)
 
  elseif (ObsSet .eq. 30 .or. ObsSet .eq. 301) then           ! ttb+gamma coupl. analysis (gammacoupl)
-
     pT_ATop = get_PT(Mom(1:4,tbar))
     pT_Top  = get_PT(Mom(1:4,t))
 
@@ -9618,10 +9617,10 @@ elseif( ObsSet.eq.29) then! ttb+photon production without top decays at Tevatron
        ! combine remaining b-jet with two LIGHTEST jets -- always 3,4 (even with radiation)???
        if ( abs(get_MInv(MomJet(1:4,1)+Mom(1:4,L))) .lt. abs(get_MInv(MomJet(1:4,2)+Mom(1:4,L))) ) then
           mTblP = get_MT(MomJet(1:4,1)+Mom(1:4,L)+Mom(1:4,pho),MomMiss(1:4))
-          m_jjb = get_MInv(MomJet(1:4,2)+MomJet(1:4,3)+Mom(1:4,4))
+          m_jjb = get_MInv(MomJet(1:4,2)+MomJet(1:4,3)+MomJet(1:4,4))
        else
           mTblP = get_MT(MomJet(1:4,2)+Mom(1:4,L)+Mom(1:4,pho),MomMiss(1:4))
-          m_jjb = get_MInv(MomJet(1:4,1)+MomJet(1:4,3)+Mom(1:4,4))
+          m_jjb = get_MInv(MomJet(1:4,1)+MomJet(1:4,3)+MomJet(1:4,4))
        endif
        
 ! inv mass of light jets
@@ -9641,32 +9640,26 @@ elseif( ObsSet.eq.29) then! ttb+photon production without top decays at Tevatron
        mT_lp = get_MT(Mom(1:4,pho)+Mom(1:4,L),MomMiss(1:4))
 
 ! apply RDS cuts
-       if( (mTblP.lt.180d0*GeV) ) then
-!          applyPSCut = .true.
-          RETURN
-       endif
-
-       if( m_jjb.lt.160d0*GeV .or. m_jjb.gt.180d0*GeV) then
-!          applyPSCut = .true.
-          RETURN
-       endif
-
-       if( mT_lp.lt.90d0*GeV ) then
-!          applyPSCut = .true.
-          RETURN
-       endif
-
-       if( m_jj.lt.70d0*GeV .or. m_jj.gt.90d0*GeV) then
-!          applyPSCut = .true.
-          RETURN
-       endif
+!!       if( (mTblP.lt.180d0*GeV) ) then
+!!!          applyPSCut = .true.
+!!          RETURN
+!!       endif
+!!
+!!       if( m_jjb.lt.160d0*GeV .or. m_jjb.gt.180d0*GeV) then
+!!!          applyPSCut = .true.
+!!          RETURN
+!!       endif
+!!
+!!       if( mT_lp.lt.90d0*GeV ) then
+!!!          applyPSCut = .true.
+!!          RETURN
+!!       endif
+!!
+!!       if( m_jj.lt.70d0*GeV .or. m_jj.gt.90d0*GeV) then
+!!!          applyPSCut = .true.
+!!          RETURN
+!!       endif
 !!    endif
-
-
-       
-    
-
-
 
 ! binning
     NBin(1) = WhichBin(1,pT_ATop)
@@ -9700,7 +9693,6 @@ elseif( ObsSet.eq.29) then! ttb+photon production without top decays at Tevatron
     NBin(29) = WhichBin(29,Phi_LP)  
     NBin(30) = WhichBin(30,m_jj)
     
-    
     if( present(PObs) ) then
        PObs(1) = pT_ATop
        PObs(2) = eta_ATop
@@ -9732,9 +9724,6 @@ elseif( ObsSet.eq.29) then! ttb+photon production without top decays at Tevatron
        PObs(28) = m_leppho  
        PObs(29) = Phi_LP 
        PObs(30) = m_jj
-       PObs(31) = m_jjb
-       PObs(32) = mTblP
-       PObs(33) = mT_lp
     endif
 
 
